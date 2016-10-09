@@ -1,0 +1,24 @@
+{
+  "name": "zorn",
+  "version": "0.0.1",
+  "description": "A static website generator",
+  "main": "zorn.py",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xassbit/zorn.git"
+  },
+  "keywords": [
+    "website",
+    "static",
+    "generator"
+  ],
+  "author": "Daniel Matias Ferrer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xassbit/zorn/issues"
+  },
+  "homepage": "https://github.com/xassbit/zorn#readme"
+}
