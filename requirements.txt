@@ -1,2 +1,7 @@
 Jinja2==2.8
+linecache2==1.0.0
 MarkupSafe==0.23
+six==1.10.0
+traceback2==1.4.0
+unittest2==1.1.0
+-e git+git@github.com:xassbit/zorn.git@603955b5807f7991152ef0e6acc201db2b2dfc5f#egg=zorn

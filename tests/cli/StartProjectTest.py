@@ -16,7 +16,7 @@ class TestStartProject(unittest.TestCase):
         self.assertTrue(os.path.exists(self.new_project.project_dir))
 
     def test_raise_error_when_creating_existing_dir(self):
-        with self.assertRaises(StartProject.DirectoryExistsError):
+        with self.assertRaises(FileExistsError):
             self.new_project.create_dir()
             self.new_project.create_dir()
 
