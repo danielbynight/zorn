@@ -1,6 +1,6 @@
 import unittest
 
-from tests.cli import StartProjectTest
+from .cli import StartProjectTest
 
 suite = unittest.TestSuite()
 
