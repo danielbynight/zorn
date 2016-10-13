@@ -1,4 +1,4 @@
-from zorn import Elements
+from zorn import elements
 import os
 
 # General
@@ -18,11 +18,11 @@ MARKDOWN_DIR = os.path.join(ROOT_DIR, 'md')
 # Navigation
 
 PAGES = [
-    Elements.Page('Home', 'index'),
-    Elements.Page('Documentation', 'doc', [
-        Elements.SubPage('Getting Started', 'getting_started'),
-        Elements.SubPage('CLI', 'cli'),
-        Elements.SubPage('Templates', 'templates'),
+    elements.Page('Home', 'index'),
+    elements.Page('Documentation', 'doc', [
+        elements.SubPage('Getting Started', 'getting_started'),
+        elements.SubPage('CLI', 'cli'),
+        elements.SubPage('Templates', 'templates'),
     ]),
-    Elements.Page('Contact', 'contact'),
+    elements.Page('Contact', 'contact'),
 ]

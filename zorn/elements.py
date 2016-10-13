@@ -1,5 +1,6 @@
 class PageError(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(self, message)
 
 class Page:
     def __init__(self, page_name, file_name, sub_pages=None):
@@ -10,7 +11,7 @@ class Page:
 
         for sub_page in sub_pages:
             if type(sub_page) is not SubPage:
-                raise AttributeError
+                raise PageError('All elements of submenu have to be of type zorn.Elements.SubPage')
 
         self.sub_pages = sub_pages
 
