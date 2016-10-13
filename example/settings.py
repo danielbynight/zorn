@@ -1,4 +1,4 @@
-from zorn.Page import Page
+from zorn.Elements import Page
 import os
 
 # General
