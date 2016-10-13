@@ -13,7 +13,7 @@ setup(
     license = "MIT",
     keywords = 'static website generator',
     url = 'http://controlledflame.com',
-    packages=['zorn', 'tests'],
+    packages=['zorn'],
     long_description=read('README.md'),
     classifiers=[],
 )
