@@ -1,7 +1,9 @@
 Jinja2==2.8
 linecache2==1.0.0
 MarkupSafe==0.23
+py==1.4.31
+pytest==3.0.3
 six==1.10.0
 traceback2==1.4.0
 unittest2==1.1.0
--e git+git@github.com:xassbit/zorn.git@1fc8730716764ddc444d5396c470ad8352150e7a#egg=zorn
+-e git+git@github.com:xassbit/zorn.git@5aa6db03ee0f452fa81c26cc1009d3c471dff131#egg=zorn
