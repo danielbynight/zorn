@@ -10,4 +10,3 @@ pytest==3.0.3
 six==1.10.0
 traceback2==1.4.0
 unittest2==1.1.0
--e git+git@github.com:xassbit/zorn.git@ff2df05651f1f7cf5061e50fabbf72d45c8924d9#egg=zorn
