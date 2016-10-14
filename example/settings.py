@@ -3,7 +3,7 @@ import os
 
 # General
 
-PROJECT_NAME = os.path.relpath('.', '..')
+PROJECT_NAME = 'example'
 SITE_TITLE = 'Zorn'
 SITE_SUBTITLE = 'Getting Started'
 AUTHOR = 'Daniel Matias Ferrer'
@@ -18,7 +18,9 @@ MARKDOWN_DIR = os.path.join(ROOT_DIR, 'md')
 # Navigation
 
 PAGES = [
-    elements.Page('Home', 'index'),
+    elements.Page('Home', 'index', [
+        elements.SubPage('Example', 'example')
+    ]),
     elements.Page('Documentation', 'doc', [
         elements.SubPage('Getting Started', 'getting_started'),
         elements.SubPage('CLI', 'cli'),

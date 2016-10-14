@@ -14,6 +14,7 @@ class PageError(Exception):
 
 class Page:
     type = 'main'
+
     def __init__(self, title, file_name, sub_pages=None):
         self.title = title
         self.file_name = file_name
@@ -49,6 +50,7 @@ class Page:
 class SubPage(Page):
     """A helper class to avoid attempts of creation of sub-sub pages"""
     type = 'sub_page'
+
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
 
@@ -75,13 +77,26 @@ class Website:
     def generate_pages(self):
         for page in self.pages:
 
-            with open(os.path.join(self.markdown_dir,
-                                   '{0}.md'.format(page.file_name))) as f:
-                body_content = f.read()
-                body_content = markdown.markdown(body_content)
+            if os.path.isfile(os.path.join(self.markdown_dir,
+                                           '{0}.md'.format(page.file_name))):
+                with open(os.path.join(self.markdown_dir,
+                                       '{0}.md'.format(page.file_name))) as f:
+                    body_content = f.read()
+                    body_content = markdown.markdown(body_content)
+            else:
+                body_content = ''
 
             footer_content = '&copy; {0} {1}'.format(
                 datetime.datetime.now().year, self.author)
+
+            # list of links which should have class "active" in nav bar
+            active_nav_links = [page.title]
+            if type(page) is SubPage:
+                # if the page in question is a subpage then activate parent too
+                active_nav_links.extend(
+                    [parent_page.title for parent_page in self.pages if
+                     page in parent_page.sub_pages]
+                )
 
             html = self.pages[0].render_html({
                 'site_description': self.description,
@@ -91,8 +106,9 @@ class Website:
                 'site_sub_title': self.subtitle,
                 'page_title': page.title,
                 'body_content': body_content,
-                'footer_content' : footer_content,
-                'pages' : [page for page in self.pages if page.type == 'main'],
+                'footer_content': footer_content,
+                'pages': [page for page in self.pages if page.type == 'main'],
+                'active_nav_links': active_nav_links,
             })
             with open(os.path.join(self.root_dir,
                                    '{0}.html'.format(page.file_name)),
