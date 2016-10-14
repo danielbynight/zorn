@@ -1,0 +1,26 @@
+<nav class="container">
+    <ul>
+        {% for page in pages %}
+        {% if page.title == page_title %}
+        <li class="active">
+        {% else %}
+        <li>
+        {% endif %}
+            <a href="./{{ page.file_name }}.html">{{ page.title }}</a>
+        {% if page.sub_pages != [] %}
+        <ul>
+            {% for sub_page in page.sub_pages %}
+            {% if sub_page.title == page_title %}
+            <li class="active">
+            {% else %}
+            <li>
+            {% endif %}
+                <a href="./{{ sub_page.file_name }}.html">{{ sub_page.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</nav>

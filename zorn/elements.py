@@ -13,6 +13,7 @@ class PageError(Exception):
 
 
 class Page:
+    type = 'main'
     def __init__(self, title, file_name, sub_pages=None):
         self.title = title
         self.file_name = file_name
@@ -47,7 +48,7 @@ class Page:
 
 class SubPage(Page):
     """A helper class to avoid attempts of creation of sub-sub pages"""
-
+    type = 'sub_page'
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
 
@@ -91,6 +92,7 @@ class Website:
                 'page_title': page.title,
                 'body_content': body_content,
                 'footer_content' : footer_content,
+                'pages' : [page for page in self.pages if page.type == 'main'],
             })
             with open(os.path.join(self.root_dir,
                                    '{0}.html'.format(page.file_name)),
