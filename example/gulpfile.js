@@ -42,4 +42,4 @@ gulp.task('watch', function () {
 
 // Default
 
-gulp.task('default', ['sass', 'prod']);
+gulp.task('default', ['sass', 'prod', 'generate']);
