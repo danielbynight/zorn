@@ -1,6 +1,13 @@
+import importlib
+import os
+
+import zorn.elements
+
+
 def process_request(args):
-    args = args[1:]
-    print(args)
+    # Find command
+    if args[1] == 'generate':
+        return Generate(args)
 
 
 class UnrecognizedFlagError(Exception):
@@ -23,4 +30,20 @@ class Command:
 
 
 class Generate(Command):
-    pass
+    _available_flags = []
+
+    @staticmethod
+    def process_settings():
+
+        module = importlib.import_module(os.environ['ZORN_SETTINGS'])
+        settings = {}
+        for setting in module.__dict__.keys():
+            if setting.upper() == setting:
+                settings[setting.lower()] = module.__dict__[setting]
+
+        return settings
+
+    def __init__(self, args):
+        super().__init__(args)
+        website = zorn.elements.Website(self.process_settings())
+        website.generate_pages()

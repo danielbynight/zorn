@@ -3,6 +3,7 @@ import os
 
 # General
 
+PROJECT_NAME = os.path.relpath('.', '..')
 SITE_TITLE = 'Zorn - Getting Started'
 AUTHOR = 'Daniel Matias Ferrer'
 DESCRIPTION = 'A static website generator'
@@ -11,9 +12,7 @@ KEYWORDS = 'static generator website'
 # Directories
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')
 MARKDOWN_DIR = os.path.join(ROOT_DIR, 'md')
-
 
 # Navigation
 
