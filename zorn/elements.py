@@ -68,7 +68,7 @@ class Website:
             module_name = os.environ['ZORN_SETTINGS']
             raise SettingNotFoundError(
                 'ROOT_DIR has to be set in the settings module ({0}).'.
-                    format(module_name)
+                format(module_name)
             )
         self.root_dir = settings['root_dir']
 
@@ -76,7 +76,7 @@ class Website:
             module_name = os.environ['ZORN_SETTINGS']
             raise SettingNotFoundError(
                 'PROJECT_NAME has to be set in the settings module ({0}).'.
-                    format(module_name)
+                format(module_name)
             )
         self.project_name = settings['project_name']
 
