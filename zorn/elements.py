@@ -8,8 +8,11 @@ import datetime
 
 
 class PageError(Exception):
-    def __init__(self, message):
-        super().__init__(self, message)
+    pass
+
+
+class SettingNotFoundError(Exception):
+    pass
 
 
 class Page:
@@ -57,23 +60,59 @@ class SubPage(Page):
 
 class Website:
     def __init__(self, settings):
-        self.root_dir = settings['root_dir']
-        self.markdown_dir = settings['markdown_dir']
-        self.description = settings['description']
-        self.title = settings['site_title']
-        self.subtitle = settings['site_subtitle']
-        self.project_name = settings['project_name']
-        self.author = settings['author']
-        self.description = settings['description']
-        self.keywords = settings['keywords']
 
-        self.debug = settings['debug'] if 'debug' in settings.keys() else False
+        settings_keys = settings.keys()
+
+        # Non-optional settings
+        if 'root_dir' not in settings_keys:
+            module_name = os.environ['ZORN_SETTINGS']
+            raise SettingNotFoundError(
+                'ROOT_DIR has to be set in the settings module ({0}).'.
+                    format(module_name)
+            )
+        self.root_dir = settings['root_dir']
+
+        if 'project_name' not in settings_keys:
+            module_name = os.environ['ZORN_SETTINGS']
+            raise SettingNotFoundError(
+                'PROJECT_NAME has to be set in the settings module ({0}).'.
+                    format(module_name)
+            )
+        self.project_name = settings['project_name']
+
+        # Optional settings
+        self.debug = settings['debug'] if 'debug' in settings_keys else False
+
+        self.markdown_dir = settings['markdown_dir'] \
+            if 'markdown_dir' in settings_keys \
+            else os.path.join(self.root_dir, 'md')
+
+        self.title = settings['site_title'] \
+            if 'site_title' in settings_keys \
+            else self.project_name
+
+        self.subtitle = settings['site_subtitle'] \
+            if 'site.subtitle' in settings_keys \
+            else ''
+
+        self.description = settings['description'] \
+            if 'description' in settings_keys \
+            else ''
+
+        self.author = settings['author'] \
+            if 'author' in settings_keys \
+            else ''
+
+        self.keywords = settings['keywords'] \
+            if 'keywords' in settings_keys \
+            else ''
 
         all_pages = []
-        for page in settings['pages']:
-            all_pages.append(page)
-            if len(page.sub_pages) > 0:
-                all_pages.extend(page.sub_pages)
+        if 'pages' in settings_keys:
+            for page in settings['pages']:
+                all_pages.append(page)
+                if len(page.sub_pages) > 0:
+                    all_pages.extend(page.sub_pages)
         self.pages = all_pages
 
     def generate_pages(self):

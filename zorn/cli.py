@@ -1,18 +1,29 @@
 import importlib
 import os
 
+import sys
+
 import zorn.elements
 
 
 def process_request(args):
-    # Find command
-    if args[1] == 'generate':
-        return Generate(args)
+    try:
+        # Register commands here
+        if args[1] == 'generate':
+            return Generate(args)
+    except Exception as e:
+        sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
 
 
 class UnrecognizedFlagError(Exception):
     pass
 
+class CliColors:
+    HEADER = '\033[32m'
+    MAIN = '\033[36m'
+    ERROR = '\033[1;31m'
+    SUCESS = '\033[1;32m'
+    RESET = '\033[0m'
 
 class Command:
     _available_flags = []
@@ -27,6 +38,8 @@ class Command:
                 )
         if len(args) > 2:
             self.args = [arg for arg in args[2:] if arg[0] != '-']
+
+        print(CliColors.HEADER + '\nWelcome to zorn!\n')
 
 
 class Generate(Command):
@@ -45,5 +58,10 @@ class Generate(Command):
 
     def __init__(self, args):
         super().__init__(args)
-        website = zorn.elements.Website(self.process_settings())
-        website.generate_pages()
+        print(CliColors.MAIN + 'Generating... \n')
+        try:
+            website = zorn.elements.Website(self.process_settings())
+            website.generate_pages()
+        except Exception as e:
+            sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
+        print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
