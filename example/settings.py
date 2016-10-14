@@ -4,7 +4,8 @@ import os
 # General
 
 PROJECT_NAME = os.path.relpath('.', '..')
-SITE_TITLE = 'Zorn - Getting Started'
+SITE_TITLE = 'Zorn'
+SITE_SUBTITLE = 'Getting Started'
 AUTHOR = 'Daniel Matias Ferrer'
 DESCRIPTION = 'A static website generator'
 KEYWORDS = 'static generator website'

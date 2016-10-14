@@ -4,6 +4,8 @@ import jinja2
 
 import markdown
 
+import datetime
+
 
 class PageError(Exception):
     def __init__(self, message):
@@ -56,6 +58,7 @@ class Website:
         self.markdown_dir = settings['markdown_dir']
         self.description = settings['description']
         self.title = settings['site_title']
+        self.subtitle = settings['site_subtitle']
         self.project_name = settings['project_name']
         self.author = settings['author']
         self.description = settings['description']
@@ -76,13 +79,18 @@ class Website:
                 body_content = f.read()
                 body_content = markdown.markdown(body_content)
 
+            footer_content = '&copy; {0} {1}'.format(
+                datetime.datetime.now().year, self.author)
+
             html = self.pages[0].render_html({
                 'site_description': self.description,
                 'site_author': self.author,
                 'site_keywords': self.keywords,
                 'site_title': self.title,
+                'site_sub_title': self.subtitle,
                 'page_title': page.title,
                 'body_content': body_content,
+                'footer_content' : footer_content,
             })
             with open(os.path.join(self.root_dir,
                                    '{0}.html'.format(page.file_name)),
