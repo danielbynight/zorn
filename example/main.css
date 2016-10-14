@@ -17,3 +17,10 @@ nav .submenu {
 
 nav .submenu-trigger:hover .submenu {
   display: block; }
+
+header {
+  text-align: center; }
+  header h1 {
+    display: inline; }
+  header h2 {
+    display: inline; }

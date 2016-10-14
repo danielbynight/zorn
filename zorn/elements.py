@@ -67,6 +67,8 @@ class Website:
         self.description = settings['description']
         self.keywords = settings['keywords']
 
+        self.debug = settings['debug'] if 'debug' in settings.keys() else False
+
         all_pages = []
         for page in settings['pages']:
             all_pages.append(page)
@@ -99,6 +101,7 @@ class Website:
                 )
 
             html = self.pages[0].render_html({
+                'debug': self.debug,
                 'site_description': self.description,
                 'site_author': self.author,
                 'site_keywords': self.keywords,

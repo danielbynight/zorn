@@ -1,6 +1,8 @@
 from zorn import elements
 import os
 
+DEBUG = True
+
 # General
 
 PROJECT_NAME = 'example'

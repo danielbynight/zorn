@@ -4,7 +4,8 @@ var gulp = require('gulp');
 var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer');
 var cleanCSS = require('gulp-clean-css');
-var rename = require("gulp-rename");
+var rename = require('gulp-rename');
+var shell = require('gulp-shell')
 
 //  CSS
 
@@ -17,6 +18,10 @@ gulp.task('sass', function () {
     .pipe(gulp.dest('./'));
 });
 
+// Content
+
+gulp.task('generate', shell.task(['python admin.py generate']))
+
 // Compile for production environment
 
 gulp.task('prod', function() {
@@ -26,10 +31,13 @@ gulp.task('prod', function() {
     .pipe(gulp.dest('./'));
 });
 
- // Watch
+// Watch
 
 gulp.task('watch', function () {
-  gulp.watch('./scss/**/*.scss', ['sass', 'prod']);
+  gulp.watch(
+    ['./scss/**/*.scss', 'settings.py', './**/*.md'],
+    ['sass', 'prod', 'generate']
+  );
 });
 
 // Default
