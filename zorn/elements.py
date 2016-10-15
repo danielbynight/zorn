@@ -107,6 +107,10 @@ class Website:
             if 'keywords' in settings_keys \
             else ''
 
+        self.markdown_extensions = settings['markdown_extensions'] \
+            if 'markdown_extensions' in settings_keys \
+            else ''
+
         all_pages = []
         if 'pages' in settings_keys:
             for page in settings['pages']:
@@ -123,7 +127,10 @@ class Website:
                 with open(os.path.join(self.markdown_dir,
                                        '{0}.md'.format(page.file_name))) as f:
                     body_content = f.read()
-                    body_content = markdown.markdown(body_content)
+                    body_content = markdown.markdown(
+                        body_content,
+                        extensions=self.markdown_extensions
+                    )
             else:
                 body_content = ''
 
