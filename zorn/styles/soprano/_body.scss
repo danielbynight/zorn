@@ -54,11 +54,12 @@
     }
 
     pre {
-        width: 75%;
         margin: 1em;
         background-color: darken($background-color, 10%);
         font-size: 11pt;
         padding: 1.5pt 7pt;
         border-radius: 1pt;
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
 }
