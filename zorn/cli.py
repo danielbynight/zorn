@@ -65,6 +65,7 @@ class Command:
     _available_flags = []
 
     def __init__(self, args):
+        self.silent = False
         self.name = args[1]
         self.flags = [flag for flag in args if flag[0] == '-']
         for flag in self.flags:
@@ -81,6 +82,10 @@ class Command:
             '\nWelcome to zorn!\n' +
             CliColors.RESET
         )
+
+    def communicate(self, message):
+        if self.silent is False:
+            print(message)
 
 
 class NotFound(Command):
@@ -119,90 +124,105 @@ class Generate(Command):
 
 class Create(Command):
     _styles = ['', 'basic', 'soprano']
+    _available_flags = ['-s', '--silent']
 
     def __init__(self, args):
         super().__init__(args)
 
         self.cwd = os.getcwd()
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
+        if '-s' in self.flags or '--silent' in self.flags:
+            self.silent = True
 
-        # Get variables
-        try:
-            project_name = input('Give your project a name: ')
-            while project_name == '' or \
-                    ' ' in project_name or \
-                    os.path.exists(os.path.join(self.cwd, project_name)):
-                print('The project name cannot be empty or have spaces.')
-                print('Also, a directory with that name cannot exist yet.')
-                project_name = input('Give your project a name: ')
-
-            self.project_name = project_name
-            self.root_dir = os.path.join(self.cwd, project_name)
-
-            temp_site_title = project_name.capitalize() \
+        # If a project name was passed as an argument,
+        # create the site based on it
+        arguments = [arg for arg in args if arg[0] != '-']
+        if len(arguments) > 2:
+            self.project_name = arguments[2]
+            self.root_dir = os.path.join(self.cwd, self.project_name)
+            self.site_title = self.project_name.capitalize() \
                 .replace('-', ' ') \
                 .replace('_', ' ')
-            site_title = input(
-                'Give your site a title ({0}): '.format(temp_site_title)
-            )
-            if site_title.strip() == '':
-                self.site_title = temp_site_title
+            self.author = getpass.getuser()
+            self.style = 'basic'
+        else:
+            # Get variables
+            try:
+                project_name = input('Give your project a name: ')
+                while project_name == '' or \
+                        ' ' in project_name or \
+                        os.path.exists(os.path.join(self.cwd, project_name)):
+                    print('The project name cannot be empty or have spaces.')
+                    print('Also, a directory with that name cannot exist yet.')
+                    project_name = input('Give your project a name: ')
 
-            temp_author = getpass.getuser()
-            author = input(
-                'Who is the site author? ({0}) '.format(temp_author)
-            )
-            if author.strip() == '':
-                self.author = temp_author
+                self.project_name = project_name
+                self.root_dir = os.path.join(self.cwd, project_name)
 
-            style = input('Choose a style - basic or soprano (basic): ')
-            while style not in Create._styles:
-                print('Unrecognized syle...')
-                print('Available styles:')
-                for style in Create._styles:
-                    print('\t' + style)
-                style = input('Choose a style (basic): ')
-            if style == '':
-                style = 'basic'
-            self.style = style
+                temp_site_title = project_name.capitalize() \
+                    .replace('-', ' ') \
+                    .replace('_', ' ')
+                site_title = input(
+                    'Give your site a title ({0}): '.format(temp_site_title)
+                )
+                if site_title.strip() == '':
+                    self.site_title = temp_site_title
 
-        except KeyboardInterrupt:
-            sys.exit(
-                '\n\n' +
-                CliColors.ERROR +
-                'You have interrupted the creation of a new zorn project.\n' +
-                CliColors.SUCESS +
-                'No worries, it\'s ok to change your mind. Bye!\n' +
-                CliColors.RESET
-            )
+                temp_author = getpass.getuser()
+                author = input(
+                    'Who is the site author? ({0}) '.format(temp_author)
+                )
+                if author.strip() == '':
+                    self.author = temp_author
+
+                style = input('Choose a style - basic or soprano (basic): ')
+                while style not in Create._styles:
+                    print('Unrecognized syle...')
+                    self.communicate('Available styles:')
+                    for style in Create._styles:
+                        self.communicate('\t' + style)
+                    style = input('Choose a style (basic): ')
+                if style == '':
+                    style = 'basic'
+                self.style = style
+
+            except KeyboardInterrupt:
+                sys.exit(
+                    '\n\n' +
+                    CliColors.ERROR +
+                    'You have interrupted the creation of a new zorn project.\n' +
+                    CliColors.SUCESS +
+                    'No worries, it\'s ok to change your mind. Bye!\n' +
+                    CliColors.RESET
+                )
 
         print('\nStarting...\n')
 
-        print("- creating project's directory")
+        self.communicate("- creating project's directory")
         self.create_dir('')
 
-        print('- adding settings file')
+        self.communicate('- adding settings file')
         self.add_file_from_template('settings.py')
 
-        print('- adding admin file')
+        self.communicate('- adding admin file')
         self.add_file_from_template('admin.py')
 
-        print('- creating the markdown directory')
+        self.communicate('- creating the markdown directory')
         self.create_dir('md')
 
-        print('- adding index content')
+        self.communicate('- adding index content')
         md_content = '#Hello, world\n' \
                      'you have successfully created the zorn project "{0}"!' \
-            .format(project_name)
+            .format(self.project_name)
         self.add_file_with_content(os.path.join('md', 'index.md'), md_content)
 
-        print('- adding npm package file')
+        self.communicate('- adding npm package file')
         package_content = json.dumps({
-            'name': project_name,
+            'name': self.project_name,
             'version': '0.0.1',
             'description': '',
             'main': 'index.html',
-            'author': author,
+            'author': self.author,
             'devDependencies': {
                 'gulp': '^3.9.1',
                 'gulp-autoprefixer': '^3.1.1',
@@ -217,13 +237,13 @@ class Create(Command):
         }, sort_keys=True, indent=2)
         self.add_file_with_content('package.json', package_content)
 
-        print('- adding gulpfile')
+        self.communicate('- adding gulpfile')
         self.copy_file(
             os.path.join('defaults', 'gulpfile.js'),
             'gulpfile.js'
         )
 
-        print('- adding style')
+        self.communicate('- adding style')
         self.copy_dir(
             os.path.join('styles', self.style),
             'scss'
@@ -237,7 +257,9 @@ class Create(Command):
                 'cd {0} && npm install --silent'.format(self.project_name))
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
         if auto_generate == 'no':
-            print('Now you can run "npm install" to generate the website!\n')
+            self.communicate(
+                'Now you can run "npm install" to generate the website!\n'
+            )
         print(CliColors.SUCESS + 'Good luck!' + CliColors.RESET + '\n')
 
     # Tasks
@@ -276,7 +298,7 @@ class Create(Command):
 
 
 class ImportTemplates(Command):
-    _available_flags = ['-u']
+    _available_flags = ['-u', '--update']
 
     def __init__(self, args):
         super().__init__(args)
@@ -294,7 +316,7 @@ class ImportTemplates(Command):
             os.path.join(settings['root_dir'], 'templates')
         )
 
-        if '-u' in self.flags:
+        if '-u' in self.flags or '--update' in self.flags:
             with open(
                     os.path.join(settings['root_dir'], 'settings.py'
                                  ), 'a') as f:
