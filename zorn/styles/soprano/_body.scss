@@ -1,0 +1,48 @@
+.main-content {
+    margin: auto;
+    padding: 20px 0;
+    width: 70%;
+
+    h1 {
+        padding: 0.5em 0;
+        font-size: 25pt;
+        font-weight: 100;
+    }
+
+    h2 {
+        padding: 0.7em 0 0.5em;
+        font-size: 20pt;
+        font-weight: 700;
+    }
+
+    h3 {
+        padding: 0.7em 0 0.5em;
+        font-size: 20pt;
+        font-weight: 100;
+    }
+
+    h4 {
+        padding: 0.7em 0 0.5em;
+        font-size: 17pt;
+        font-weight: 700;
+    }
+
+    h5 {
+        padding: 0.7em 0 0.5em;
+        font-size: 17pt;
+        font-weight: 100;
+    }
+
+    h6 {
+        padding: 0.7em 0 0.5em;
+        font-size: 13pt;
+        font-weight: 700;
+    }
+
+    p {
+        padding: 0.3em 0;
+        color: lighten($main-color, 15%);
+        font-size: 13pt;
+        font-weight: 100;
+    }
+}

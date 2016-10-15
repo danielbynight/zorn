@@ -7,8 +7,6 @@ venv/
 zorn.egg-info/
 activate
 .cache/
-example/node_modules
-example/*.html
-example/*.css
+example/
 test/
 **/.DS_Store

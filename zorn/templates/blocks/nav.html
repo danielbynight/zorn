@@ -1,18 +1,20 @@
 <nav class="container">
-    <ul>
-        {% for page in pages %}
-        <li {% if page.sub_pages != [] %}class="submenu-trigger"{% endif %}>
-            <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
-        {% if page.sub_pages != [] %}
-        <ul class="submenu">
-            {% for sub_page in page.sub_pages %}
-            <li>
-                <a href="./{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
+    <div class="nav">
+        <ul>
+            {% for page in pages %}
+            <li {% if page.sub_pages != [] %}class="submenu-trigger"{% endif %}>
+                <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
+            {% if page.sub_pages != [] %}
+            <ul class="submenu">
+                {% for sub_page in page.sub_pages %}
+                <li>
+                    <a href="./{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
             </li>
             {% endfor %}
         </ul>
-        {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+    </div>
 </nav>

@@ -92,7 +92,7 @@ class Website:
             else self.project_name
 
         self.subtitle = settings['site_subtitle'] \
-            if 'site.subtitle' in settings_keys \
+            if 'site_subtitle' in settings_keys \
             else ''
 
         self.description = settings['description'] \
@@ -145,7 +145,7 @@ class Website:
                 'site_author': self.author,
                 'site_keywords': self.keywords,
                 'site_title': self.title,
-                'site_sub_title': self.subtitle,
+                'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
                 'body_content': body_content,
                 'footer_content': footer_content,
