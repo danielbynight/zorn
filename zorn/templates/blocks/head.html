@@ -9,8 +9,4 @@
 <meta name="keywords" content="{{ site_keywords }}">
 {% endif %}
 <title>{{ site_title }} - {{ page_title }}</title>
-{% if debug == True %}
-<link rel="stylesheet" type="text/css" media="screen" href="./main.css">
-{% else %}
-<link rel="stylesheet" type="text/css" media="screen" href="./main.min.css">
-{% endif %}
+<link rel="stylesheet" type="text/css" media="screen" href="{{ css_path }}">

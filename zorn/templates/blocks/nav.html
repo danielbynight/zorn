@@ -3,12 +3,28 @@
         <ul class="nav-content">
             {% for page in pages %}
             <li {% if page.sub_pages != [] %}class="submenu-trigger"{% endif %}>
+                {% if url_style == 'flat' %}
                 <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
+                {% else %}
+                    {% if page_type == 'main' %}
+                <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
+                    {% else %}
+                <a href="../{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
+                    {% endif %}
+                {% endif %}
             {% if page.sub_pages != [] %}
             <ul class="submenu">
                 {% for sub_page in page.sub_pages %}
                 <li>
+                    {% if url_style == 'flat' %}
                     <a href="./{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
+                    {% else %}
+                        {% if page_type == 'main' %}
+                    <a href="./{{ page.file_name }}/{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
+                        {% else %}
+                    <a href="../{{ page.file_name }}/{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
+                        {% endif %}
+                    {% endif %}
                 </li>
                 {% endfor %}
             </ul>

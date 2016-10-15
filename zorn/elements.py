@@ -83,9 +83,20 @@ class Website:
         # Optional settings
         self.debug = settings['debug'] if 'debug' in settings_keys else False
 
+        self.url_style = settings['url_style'] \
+            if 'url_style' in settings_keys \
+            else 'flat'
+
+        if self.url_style not in ['flat', 'nested']:
+            self.url_style = 'flat'
+
         self.markdown_dir = settings['markdown_dir'] \
             if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
+
+        self.markdown_extensions = settings['markdown_extensions'] \
+            if 'markdown_extensions' in settings_keys \
+            else ''
 
         self.title = settings['site_title'] \
             if 'site_title' in settings_keys \
@@ -107,10 +118,6 @@ class Website:
             if 'keywords' in settings_keys \
             else ''
 
-        self.markdown_extensions = settings['markdown_extensions'] \
-            if 'markdown_extensions' in settings_keys \
-            else ''
-
         all_pages = []
         if 'pages' in settings_keys:
             for page in settings['pages']:
@@ -121,6 +128,13 @@ class Website:
 
     def generate_pages(self):
         for page in self.pages:
+
+            # get parent page in case of sub page
+            parent_page = ''
+            if type(page) is SubPage:
+                parent_page =[parent_page
+                              for parent_page in self.pages
+                              if page in parent_page.sub_pages].pop()
 
             if os.path.isfile(os.path.join(self.markdown_dir,
                                            '{0}.md'.format(page.file_name))):
@@ -141,10 +155,21 @@ class Website:
             active_nav_links = [page.title]
             if type(page) is SubPage:
                 # if the page in question is a subpage then activate parent too
-                active_nav_links.extend(
-                    [parent_page.title for parent_page in self.pages if
-                     page in parent_page.sub_pages]
-                )
+                active_nav_links.append(parent_page.title)
+
+            # generate css path
+            if self.debug is True:
+                if page.type == 'main':
+                    css_path = './main.css'
+                else:
+                    css_path = './main.css' if self.url_style == 'flat' \
+                        else '../main.css'
+            else:
+                if page.type == 'main':
+                    css_path = './main.min.css'
+                else:
+                    css_path = './main.css' if self.url_style == 'flat' \
+                        else '../main.min.css'
 
             html = self.pages[0].render_html({
                 'debug': self.debug,
@@ -154,12 +179,28 @@ class Website:
                 'site_title': self.title,
                 'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
+                'page_type': page.type,
                 'body_content': body_content,
                 'footer_content': footer_content,
                 'pages': [page for page in self.pages if page.type == 'main'],
                 'active_nav_links': active_nav_links,
+                'url_style': self.url_style,
+                'css_path': css_path,
             })
-            with open(os.path.join(self.root_dir,
-                                   '{0}.html'.format(page.file_name)),
-                      'w') as f:
-                f.write(html)
+
+            if self.url_style == 'flat' or page.type == 'main':
+                with open(os.path.join(
+                        self.root_dir,
+                        '{0}.html'.format(page.file_name)
+                ), 'w') as f:
+                    f.write(html)
+            else:
+                if not  os.path.exists(
+                        os.path.join(self.root_dir,parent_page.file_name)
+                ):
+                    os.mkdir(os.path.join(self.root_dir,parent_page.file_name))
+                with open(os.path.join(
+                        self.root_dir,
+                        '{0}/{1}.html'.format(parent_page.file_name, page.file_name)
+                ), 'w') as f:
+                    f.write(html)
