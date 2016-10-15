@@ -56,7 +56,7 @@ where `my_project` is the name of your project.
 ## Nesting
 
 Zorn allows for pages to be nested as subpages. Subpages show as dropdown under their parent on the navigation menu.
-Also if the setting `URL_STYLE` is set to `'nested`, they are generated into a folder with the name of their parent.
+Also if the setting `URL_STYLE` is set to `'nested'`, they are generated into a folder with the name of their parent.
 
 ## Markdown content
 
