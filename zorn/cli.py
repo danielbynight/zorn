@@ -109,27 +109,39 @@ class Create(Command):
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
         # Get variables
-        project_name = input('Give your project a name: ')
-        while project_name == '' or \
-                ' ' in project_name or \
-                os.path.exists(os.path.join(cwd, project_name)):
-            print('The project name cannot be empty or have spaces.')
-            print('Also, a directory with its name cannot exist yet.')
+        try:
             project_name = input('Give your project a name: ')
+            while project_name == '' or \
+                            ' ' in project_name or \
+                    os.path.exists(os.path.join(cwd, project_name)):
+                print('The project name cannot be empty or have spaces.')
+                print('Also, a directory with that name cannot exist yet.')
+                project_name = input('Give your project a name: ')
 
-        temp_site_title = project_name.capitalize()
-        site_title = input(
-            'Give your site a title ({0}): '.format(temp_site_title)
-        )
-        if site_title.strip() == '':
-            site_title = temp_site_title
+            temp_site_title = project_name.capitalize() \
+                .replace('-', ' ') \
+                .replace('_', ' ')
+            site_title = input(
+                'Give your site a title ({0}): '.format(temp_site_title)
+            )
+            if site_title.strip() == '':
+                site_title = temp_site_title
 
-        temp_author = getpass.getuser()
-        author = input(
-            'Who is the site author? ({0}) '.format(temp_author)
-        )
-        if author.strip() == '':
-            author = temp_author
+            temp_author = getpass.getuser()
+            author = input(
+                'Who is the site author? ({0}) '.format(temp_author)
+            )
+            if author.strip() == '':
+                author = temp_author
+        except KeyboardInterrupt:
+            sys.exit(
+                '\n\n' +
+                CliColors.ERROR +
+                'You have interrupted the creation of a new zorn project.\n' +
+                CliColors.SUCESS +
+                'No worries, it\'s ok to change your mind. Bye!\n' +
+                CliColors.RESET
+            )
 
         print('\nStarting...\n')
 
@@ -142,9 +154,9 @@ class Create(Command):
             raw_settings_content = f.read()
         template = jinja2.Template(raw_settings_content)
         settings_content = template.render({
-            'project_name' : project_name,
-            'site_title' : site_title,
-            'author' : author,
+            'project_name': project_name,
+            'site_title': site_title,
+            'author': author,
         })
         with open(os.path.join(root_dir, 'settings.py'), 'w') as f:
             f.write(settings_content)
@@ -154,7 +166,7 @@ class Create(Command):
             raw_admin_content = f.read()
         template = jinja2.Template(raw_admin_content)
         admin_content = template.render({
-            'project_name' : project_name,
+            'project_name': project_name,
         })
         with open(os.path.join(root_dir, 'admin.py'), 'w') as f:
             f.write(admin_content)
@@ -164,7 +176,11 @@ class Create(Command):
 
         print('- adding index content')
         with open(os.path.join(root_dir, 'md', 'index.md'), 'w') as f:
-            f.write('#Hello, world\nyou have successfully created a zorn!')
+            f.write(
+                '#Hello, world\n'
+                'you have successfully created the zorn project {0}!'
+                    .format(project_name)
+            )
 
         print('- adding npm package file')
         package_content = json.dumps({

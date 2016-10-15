@@ -1,3 +1,0 @@
-#Contact
-
-controlledflame@gmail.com
