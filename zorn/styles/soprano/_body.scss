@@ -63,3 +63,9 @@
         word-wrap: break-word;
     }
 }
+
+@media only screen and (max-width: 667px) {
+    .main-content {
+        width: 90%;
+    }
+}
