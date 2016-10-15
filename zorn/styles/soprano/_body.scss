@@ -45,4 +45,20 @@
         font-size: 13pt;
         font-weight: 100;
     }
+
+    code {
+        color: darken($alt-color, 10%);
+        background-color: darken($background-color, 10%);
+        font-size: 11pt;
+        border-radius: 1pt;
+    }
+
+    pre {
+        width: 75%;
+        margin: 1em;
+        background-color: darken($background-color, 10%);
+        font-size: 11pt;
+        padding: 1.5pt 7pt;
+        border-radius: 1pt;
+    }
 }

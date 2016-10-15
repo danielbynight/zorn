@@ -2,6 +2,8 @@ import getpass
 import importlib
 import os
 import shutil
+import subprocess
+
 import jinja2
 import json
 
@@ -17,16 +19,22 @@ def process_request(args):
             args.append('help')
             return Help(args)
         elif args[1] == 'generate':
-            return Generate(args)
+            print(args[0][-8:])
+            if args[0][-8:] == 'admin.py':
+                return Generate(args)
+            else:
+                pass
         elif args[1] == 'create':
             return Create(args)
-        else:
-            return NotFound(args)
+        return NotFound(args)
     except Exception as e:
         sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
 
 
 class UnrecognizedFlagError(Exception):
+    pass
+
+class NotAZornProjectError(Exception):
     pass
 
 
@@ -74,14 +82,17 @@ class Help(Command):
         super().__init__(args)
         print(CliColors.RESET + 'Available commands:\n')
         print('help - list available commands')
-        print('generate - generate the website (i.e. its html files)')
+        print('create - start a new zorn project')
+        print('generate - generate the website (i.e. its html files)'
+              '- only avaialble through admin.py')
         print(CliColors.SUCESS + "\nAnd that's all\n")
 
 
 class Generate(Command):
     @staticmethod
     def process_settings():
-
+        if os.environ['ZORN_SETTINGS'] is None:
+            raise NotAZornProjectError('You are not inside a zorn project!')
         module = importlib.import_module(os.environ['ZORN_SETTINGS'])
         settings = {}
         for setting in module.__dict__.keys():
@@ -102,6 +113,7 @@ class Generate(Command):
 
 
 class Create(Command):
+    _styles = ['', 'basic', 'soprano']
     def __init__(self, args):
         super().__init__(args)
 
@@ -136,6 +148,18 @@ class Create(Command):
             )
             if author.strip() == '':
                 self.author = temp_author
+
+            style = input('Choose a style - basic or soprano (basic): ')
+            while style not in Create._styles:
+                print('Unrecognized syle...')
+                print('Available styles:')
+                for style in Create._styles:
+                    print('\t' + style)
+                style = input('Choose a style (basic): ')
+            if style == '':
+                style = 'basic'
+            self.style = style
+
         except KeyboardInterrupt:
             sys.exit(
                 '\n\n' +
@@ -195,12 +219,18 @@ class Create(Command):
 
         print('- adding style')
         self.copy_dir(
-            os.path.join('styles', 'basic'),
+            os.path.join('styles', self.style),
             'scss'
         )
 
+        auto_generate = input(
+            'Would you like to generate now your site - yes or no? (yes) '
+        )
+        if auto_generate != 'no':
+            os.system('cd {0} && npm install --silent'.format(self.project_name))
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
-        print('Now you can run "npm install" to generate the website!\n')
+        if auto_generate == 'no':
+            print('Now you can run "npm install" to generate the website!\n')
         print(CliColors.SUCESS + 'Good luck!' + CliColors.RESET + '\n')
 
     # Tasks

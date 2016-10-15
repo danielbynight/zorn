@@ -16,3 +16,16 @@ body {
     border-top: 10px solid lighten($main-color, 15%);
     border-bottom: 15px solid lighten($main-color, 15%);
 }
+
+
+a {
+    color: $alt-color;
+    text-decoration: none;
+    &:visited {
+        color: $alt-alt-color;
+    }
+}
+
+pre, code {
+    font-family: $monospace-font;
+}

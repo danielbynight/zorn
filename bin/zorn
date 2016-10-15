@@ -3,5 +3,6 @@ import sys
 
 if __name__ == "__main__":
     arguments = sys.argv
-    arguments.append('create')
-    cli.Create(sys.argv)
+    if len(arguments) == 1:
+        arguments.append('create')
+    cli.process_request(arguments)
