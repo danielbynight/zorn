@@ -112,7 +112,7 @@ class Create(Command):
         try:
             project_name = input('Give your project a name: ')
             while project_name == '' or \
-                            ' ' in project_name or \
+                    ' ' in project_name or \
                     os.path.exists(os.path.join(cwd, project_name)):
                 print('The project name cannot be empty or have spaces.')
                 print('Also, a directory with that name cannot exist yet.')
@@ -179,7 +179,7 @@ class Create(Command):
             f.write(
                 '#Hello, world\n'
                 'you have successfully created the zorn project {0}!'
-                    .format(project_name)
+                .format(project_name)
             )
 
         print('- adding npm package file')
