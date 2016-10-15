@@ -1,6 +1,6 @@
 <nav class="container">
-    <div class="nav">
-        <ul>
+    <div class="nav" tabindex="0">
+        <ul class="nav-content">
             {% for page in pages %}
             <li {% if page.sub_pages != [] %}class="submenu-trigger"{% endif %}>
                 <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
