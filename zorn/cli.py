@@ -105,18 +105,21 @@ class Create(Command):
     def __init__(self, args):
         super().__init__(args)
 
-        cwd = os.getcwd()
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        self.cwd = os.getcwd()
+        self.script_dir = os.path.dirname(os.path.abspath(__file__))
 
         # Get variables
         try:
             project_name = input('Give your project a name: ')
             while project_name == '' or \
                     ' ' in project_name or \
-                    os.path.exists(os.path.join(cwd, project_name)):
+                    os.path.exists(os.path.join(self.cwd, project_name)):
                 print('The project name cannot be empty or have spaces.')
                 print('Also, a directory with that name cannot exist yet.')
                 project_name = input('Give your project a name: ')
+
+            self.project_name = project_name
+            self.root_dir = os.path.join(self.cwd, project_name)
 
             temp_site_title = project_name.capitalize() \
                 .replace('-', ' ') \
@@ -125,14 +128,14 @@ class Create(Command):
                 'Give your site a title ({0}): '.format(temp_site_title)
             )
             if site_title.strip() == '':
-                site_title = temp_site_title
+                self.site_title = temp_site_title
 
             temp_author = getpass.getuser()
             author = input(
                 'Who is the site author? ({0}) '.format(temp_author)
             )
             if author.strip() == '':
-                author = temp_author
+                self.author = temp_author
         except KeyboardInterrupt:
             sys.exit(
                 '\n\n' +
@@ -146,41 +149,22 @@ class Create(Command):
         print('\nStarting...\n')
 
         print("- creating project's directory")
-        root_dir = os.path.join(cwd, project_name)
-        os.mkdir(root_dir)
+        self.create_dir('')
 
         print('- adding settings file')
-        with open(os.path.join(script_dir, 'defaults', 'settings.py')) as f:
-            raw_settings_content = f.read()
-        template = jinja2.Template(raw_settings_content)
-        settings_content = template.render({
-            'project_name': project_name,
-            'site_title': site_title,
-            'author': author,
-        })
-        with open(os.path.join(root_dir, 'settings.py'), 'w') as f:
-            f.write(settings_content)
+        self.add_file_from_template('settings.py')
 
         print('- adding admin file')
-        with open(os.path.join(script_dir, 'defaults', 'admin.py')) as f:
-            raw_admin_content = f.read()
-        template = jinja2.Template(raw_admin_content)
-        admin_content = template.render({
-            'project_name': project_name,
-        })
-        with open(os.path.join(root_dir, 'admin.py'), 'w') as f:
-            f.write(admin_content)
+        self.add_file_from_template('admin.py')
 
         print('- creating the markdown directory')
-        os.mkdir(os.path.join(root_dir, 'md'))
+        self.create_dir('md')
 
         print('- adding index content')
-        with open(os.path.join(root_dir, 'md', 'index.md'), 'w') as f:
-            f.write(
-                '#Hello, world\n'
-                'you have successfully created the zorn project {0}!'
-                .format(project_name)
-            )
+        md_content = '#Hello, world\n' \
+                     'you have successfully created the zorn project "{0}"!'\
+            .format(project_name)
+        self.add_file_with_content(os.path.join('md', 'index.md'), md_content)
 
         print('- adding npm package file')
         package_content = json.dumps({
@@ -201,25 +185,54 @@ class Create(Command):
                 'postinstall': 'gulp'
             }
         }, sort_keys=True, indent=2)
-        with open(os.path.join(root_dir, 'package.json'), 'w') as f:
-            f.write(package_content)
+        self.add_file_with_content('package.json', package_content)
 
         print('- adding gulpfile')
-        shutil.copy(
-            os.path.join(script_dir, 'defaults', 'gulpfile.js'),
-            os.path.join(root_dir, 'gulpfile.js')
+        self.copy_file(
+            os.path.join('defaults', 'gulpfile.js'),
+            'gulpfile.js'
         )
 
         print('- adding style')
-        shutil.copytree(
-            os.path.join(script_dir, 'styles', 'basic'),
-            os.path.join(root_dir, 'scss')
+        self.copy_dir(
+            os.path.join('styles', 'basic'),
+            'scss'
         )
 
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
-        print('Now you can run "npm install" to generate the style')
-        print(
-            'and "python admin.py generate" (or "gulp") to generate ' +
-            project_name + '.\n'
-        )
+        print('Now you can run "npm install" to generate the website!\n')
         print(CliColors.SUCESS + 'Good luck!' + CliColors.RESET + '\n')
+
+    # Tasks
+
+    def create_dir(self, dir_name):
+        os.mkdir(os.path.join(self.root_dir, dir_name))
+
+    def add_file_from_template(self, file_name):
+        with open(os.path.join(self.script_dir, 'defaults', file_name)) \
+                as f:
+            raw_settings_content = f.read()
+        template = jinja2.Template(raw_settings_content)
+        settings_content = template.render({
+            'project_name': self.project_name,
+            'site_title': self.site_title,
+            'author': self.author,
+        })
+        with open(os.path.join(self.root_dir, file_name), 'w') as f:
+            f.write(settings_content)
+
+    def add_file_with_content(self, path_to, content):
+        with open(os.path.join(self.root_dir, path_to), 'w') as f:
+            f.write(content)
+
+    def copy_file(self, path_from, path_to):
+        shutil.copy(
+            os.path.join(self.script_dir, path_from),
+            os.path.join(self.root_dir, path_to)
+        )
+
+    def copy_dir(self, path_from, path_to):
+        shutil.copytree(
+            os.path.join(self.script_dir, path_from),
+            os.path.join(self.root_dir, path_to)
+        )
