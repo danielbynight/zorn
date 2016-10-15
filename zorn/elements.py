@@ -37,14 +37,9 @@ class Page:
         return self.title
 
     @staticmethod
-    def render_html(context=None):
-        if context is None:
-            context = {}
-
+    def render_html(context, templates_dir):
         env = jinja2.Environment()
-        env.loader = jinja2.FileSystemLoader(
-            os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         'templates'))
+        env.loader = jinja2.FileSystemLoader(templates_dir)
         template = env.get_template(
             os.path.join('structure.html'))
         return template.render(context)
@@ -90,6 +85,11 @@ class Website:
         if self.url_style not in ['flat', 'nested']:
             self.url_style = 'flat'
 
+        self.templates_dir = settings['templates_dir'] \
+            if 'templates_dir' in settings_keys \
+            else os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              'templates')
+
         self.markdown_dir = settings['markdown_dir'] \
             if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
@@ -132,9 +132,9 @@ class Website:
             # get parent page in case of sub page
             parent_page = ''
             if type(page) is SubPage:
-                parent_page =[parent_page
-                              for parent_page in self.pages
-                              if page in parent_page.sub_pages].pop()
+                parent_page = [parent_page
+                               for parent_page in self.pages
+                               if page in parent_page.sub_pages].pop()
 
             if os.path.isfile(os.path.join(self.markdown_dir,
                                            '{0}.md'.format(page.file_name))):
@@ -186,7 +186,7 @@ class Website:
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
                 'css_path': css_path,
-            })
+            }, self.templates_dir)
 
             if self.url_style == 'flat' or page.type == 'main':
                 with open(os.path.join(
@@ -195,12 +195,14 @@ class Website:
                 ), 'w') as f:
                     f.write(html)
             else:
-                if not  os.path.exists(
-                        os.path.join(self.root_dir,parent_page.file_name)
+                if not os.path.exists(
+                        os.path.join(self.root_dir, parent_page.file_name)
                 ):
-                    os.mkdir(os.path.join(self.root_dir,parent_page.file_name))
+                    os.mkdir(
+                        os.path.join(self.root_dir, parent_page.file_name))
                 with open(os.path.join(
                         self.root_dir,
-                        '{0}/{1}.html'.format(parent_page.file_name, page.file_name)
+                        '{0}/{1}.html'.format(parent_page.file_name,
+                                              page.file_name)
                 ), 'w') as f:
                     f.write(html)

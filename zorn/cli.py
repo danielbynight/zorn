@@ -2,7 +2,6 @@ import getpass
 import importlib
 import os
 import shutil
-import subprocess
 
 import jinja2
 import json
@@ -13,26 +12,43 @@ import zorn.elements
 
 
 def process_request(args):
-    # try:
+    try:
         # Register commands here
         if len(args) < 2 or args[1] == 'help':
             args.append('help')
             return Help(args)
         elif args[1] == 'generate':
-            print(args[0][-8:])
             if args[0][-8:] == 'admin.py':
                 return Generate(args)
+            else:
+                pass
+        elif args[1] == 'importtemplates':
+            if args[0][-8:] == 'admin.py':
+                return ImportTemplates(args)
             else:
                 pass
         elif args[1] == 'create':
             return Create(args)
         return NotFound(args)
-    # except Exception as e:
-    #     sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
+    except Exception as e:
+        sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
+
+
+def process_settings():
+    if os.environ['ZORN_SETTINGS'] is None:
+        raise NotAZornProjectError('You are not inside a zorn project!')
+    module = importlib.import_module(os.environ['ZORN_SETTINGS'])
+    settings = {}
+    for setting in module.__dict__.keys():
+        if setting.upper() == setting:
+            settings[setting.lower()] = module.__dict__[setting]
+
+    return settings
 
 
 class UnrecognizedFlagError(Exception):
     pass
+
 
 class NotAZornProjectError(Exception):
     pass
@@ -52,9 +68,10 @@ class Command:
         self.name = args[1]
         self.flags = [flag for flag in args if flag[0] == '-']
         for flag in self.flags:
-            if flag not in Command._available_flags:
+            if flag not in self._available_flags:
                 raise UnrecognizedFlagError(
-                    "I'm afraid the flag {0} is not recognized." + flag
+                    'I\'m afraid the flag "{0}" is not recognized.'
+                    .format(flag)
                 )
         if len(args) > 2:
             self.args = [arg for arg in args[2:] if arg[0] != '-']
@@ -89,31 +106,20 @@ class Help(Command):
 
 
 class Generate(Command):
-    @staticmethod
-    def process_settings():
-        if os.environ['ZORN_SETTINGS'] is None:
-            raise NotAZornProjectError('You are not inside a zorn project!')
-        module = importlib.import_module(os.environ['ZORN_SETTINGS'])
-        settings = {}
-        for setting in module.__dict__.keys():
-            if setting.upper() == setting:
-                settings[setting.lower()] = module.__dict__[setting]
-
-        return settings
-
     def __init__(self, args):
         super().__init__(args)
         print(CliColors.RESET + 'Generating... \n')
-        # try:
-        website = zorn.elements.Website(self.process_settings())
-        website.generate_pages()
-        # except Exception as e:
-        #     sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
+        try:
+            website = zorn.elements.Website(process_settings())
+            website.generate_pages()
+        except Exception as e:
+            sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
 
 
 class Create(Command):
     _styles = ['', 'basic', 'soprano']
+
     def __init__(self, args):
         super().__init__(args)
 
@@ -186,7 +192,7 @@ class Create(Command):
 
         print('- adding index content')
         md_content = '#Hello, world\n' \
-                     'you have successfully created the zorn project "{0}"!'\
+                     'you have successfully created the zorn project "{0}"!' \
             .format(project_name)
         self.add_file_with_content(os.path.join('md', 'index.md'), md_content)
 
@@ -227,7 +233,8 @@ class Create(Command):
             'Would you like to generate now your site - yes or no? (yes) '
         )
         if auto_generate != 'no':
-            os.system('cd {0} && npm install --silent'.format(self.project_name))
+            os.system(
+                'cd {0} && npm install --silent'.format(self.project_name))
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
         if auto_generate == 'no':
             print('Now you can run "npm install" to generate the website!\n')
@@ -266,3 +273,33 @@ class Create(Command):
             os.path.join(self.script_dir, path_from),
             os.path.join(self.root_dir, path_to)
         )
+
+
+class ImportTemplates(Command):
+    _available_flags = ['-u']
+
+    def __init__(self, args):
+        super().__init__(args)
+        print(CliColors.RESET + 'Importing templates...\n')
+        settings = process_settings()
+        if 'root_dir' not in settings.keys():
+            raise zorn.elements.SettingNotFoundError(
+                'Root dir not found in settings.'
+            )
+        shutil.copytree(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'templates'
+            ),
+            os.path.join(settings['root_dir'], 'templates')
+        )
+
+        if '-u' in self.flags:
+            with open(
+                    os.path.join(settings['root_dir'], 'settings.py'
+                                 ), 'a') as f:
+                f.write(
+                    "\n\nTEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')"
+                )
+
+        print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
