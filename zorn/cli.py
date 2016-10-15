@@ -2,7 +2,7 @@ import getpass
 import importlib
 import os
 import shutil
-
+from distutils.sysconfig import get_python_lib
 import jinja2
 import json
 
@@ -132,7 +132,8 @@ class Create(Command):
         super().__init__(args)
 
         self.cwd = os.getcwd()
-        self.script_dir = os.path.dirname(os.path.abspath(__file__))
+        if os.path.exists(os.path.join(get_python_lib(), 'zorn')):
+            self.script_dir = os.path.join(get_python_lib(), 'zorn')
         if '-s' in self.flags or '--silent' in self.flags:
             self.silent = True
 
