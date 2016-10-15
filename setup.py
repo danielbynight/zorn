@@ -16,6 +16,11 @@ setup(
     keywords='static website generator',
     url='http://controlledflame.com',
     packages=['zorn'],
+    package_data={
+        'templates': ['zorn/templates'],
+        'styles': ['zorn/styles'],
+        'defaults': ['zorn/defaults']
+    },
     long_description=read('README.md'),
     classifiers=[],
     scripts=['bin/zorn']

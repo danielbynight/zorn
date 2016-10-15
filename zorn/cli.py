@@ -132,10 +132,6 @@ class Create(Command):
         super().__init__(args)
 
         self.cwd = os.getcwd()
-        # if os.path.exists(os.path.join(get_python_lib(), 'zorn')):
-        #     self.script_dir = os.path.join(get_python_lib(), 'zorn')
-        # elif os.path.exists(os.path.join(get_python_lib(), 'zorn.egg-link')):
-        #     self.script_dir = os.path.join(get_python_lib(), 'zorn.egg-link')
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
         if '-s' in self.flags or '--silent' in self.flags:
             self.silent = True
