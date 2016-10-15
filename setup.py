@@ -18,4 +18,5 @@ setup(
     packages=['zorn'],
     long_description=read('README.md'),
     classifiers=[],
+    scripts=['bin/zorn']
 )

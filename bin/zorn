@@ -1,0 +1,7 @@
+from zorn import cli
+import sys
+
+if __name__ == "__main__":
+    arguments = sys.argv
+    arguments.append('create')
+    cli.Create(sys.argv)
