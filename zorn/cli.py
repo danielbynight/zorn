@@ -107,6 +107,8 @@ class Help(Command):
         print('create - start a new zorn project')
         print('generate - generate the website (i.e. its html files)'
               '- only avaialble through admin.py')
+        print('importtemplates - imports the templates locally'
+              '- only avaialble through admin.py')
         print(CliColors.SUCESS + "\nAnd that's all\n")
 
 
