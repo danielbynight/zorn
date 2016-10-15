@@ -45,9 +45,11 @@
                     &:hover {
                         background-color: $alt-color;
                         @include background-color-transition();
+                        color: $background-color;
                     }
                     &.active {
                         background-color: $alt-color;
+                        color: $background-color;
                     }
                 }
             }
@@ -130,6 +132,7 @@
                             background-color: lighten($main-color, 20%)
                         }
                         &.active {
+                            color: $background-color;
                             background-color: $alt-color;
                         }
                     }
