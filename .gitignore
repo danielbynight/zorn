@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.gitignore
+.idea/
+zorn.egg-info/
+activate
+.cache/
+example/node_modules
+example/*.html
+example/*.css
+test/
+**/.DS_Store
