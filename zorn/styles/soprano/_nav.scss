@@ -1,64 +1,4 @@
-@media only screen and (min-width: 769px) {
-    .nav {
-        background-color: lighten($main-color, 15%);
-        .hamburger-button {
-            display: none;
-        }
-        ul {
-            padding-left: 100px;
-            color: $background-color;
-            background-color: lighten($main-color, 15%);
-            li {
-                list-style-type: none;
-                display: inline;
-                float: left;
-                a {
-                    display: block;
-                    padding: 10px 15px;
-                    color: $background-color;
-                    background-color: lighten($main-color, 15%);
-                    text-decoration: none;
-                    &:hover {
-                        background-color: $alt-color;
-                        @include background-color-transition();
-                    }
-                    &.active {
-                        background-color: $alt-color;
-                    }
-                }
-            }
-        }
-        .submenu {
-            display: none;
-            position: absolute;
-            margin: 0;
-            padding: 0;
-            width: 150px;
-            box-shadow: 0 10px 16px 0 rgba(0, 0, 0, 0.2);
-            li {
-                background-color: darken($background-color, 5%);
-                width: 150px;
-                a {
-                padding: 12px 20px;
-                    color: $main-color;
-                    background-color: darken($background-color, 5%);
-                    &:hover {
-                        background-color: darken($background-color, 10%);
-                        @include background-color-transition();
-                    }
-                    &.active {
-                        background-color: lighten($alt-color, 30%);
-                    }
-                }
-            }
-        }
-        .submenu-trigger:hover .submenu {
-            display: block;
-        }
-    }
-}
-
-@media only screen and (min-width: 668px) and (max-width: 768px) {
+@media only screen and (min-width: 668px) {
     .nav {
         background-color: lighten($main-color, 15%);
         .hamburger-button {
@@ -114,6 +54,14 @@
         }
         .submenu-trigger:hover .submenu {
             display: block;
+        }
+    }
+}
+
+@media only screen and (min-width: 769px) {
+    .nav {
+        ul {
+            padding-left: 100px;
         }
     }
 }
