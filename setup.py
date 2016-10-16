@@ -18,9 +18,9 @@ setup(
     packages=['zorn'],
     include_package_data=True,
     scripts=['bin/zorn'],
-    entry_points={'console_scripts': [
-        'zorn = zorn.cli:process_request',
-    ]},
+    # entry_points={'console_scripts': [
+    #     'zorn = zorn.cli:process_request',
+    # ]},
     extras_require={
         'Jinja2': ['Jinja2'],
         'Markdown': ['Markdown'],
