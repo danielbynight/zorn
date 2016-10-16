@@ -19,13 +19,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     scripts=['bin/zorn'],
-    # entry_points={'console_scripts': [
-    #     'zorn = zorn.cli:process_request',
-    # ]},
-    extras_require={
-        'Jinja2': ['Jinja2'],
-        'Markdown': ['Markdown'],
-    },
+    install_requires=[
+        'markdown',
+        'Jinja2'
+    ],
     long_description=read('README.md'),
     classifiers=[
         'Development Status :: 3 - Alpha',
