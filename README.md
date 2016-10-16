@@ -99,6 +99,8 @@ Here is a list of the available settings for a zorn project.
 When `False` the minified CSS is used.
 - `URL_STYLE` - can be `'flat'` or `'nested'`. If the former is chosen then all html files are generated in your root directory.
 If `nested` the subpages are generated into a folder with the name of their parent. This allows for urls like `domain/page/subpage`
+- `SITE_DIR` - the directory where your site will be generated to. `ROOT_DIR` by default.
+Note: the stylesheets location may have to be updated in the gulpfile (for example, `.pipe(gulp.dest('site'));`).
 - `TEMPLATES_DIR` - in case you have your templates directory locally on the project's root then pass here its path.
 - `MARKDOWN_DIR` - the directory of you markdown content. By default it's `os.path.join(ROOT_DIR, 'md')`
 - `MARKDOWN_EXTENSIONS` - the [extensions](http://pythonhosted.org/Markdown/extensions/index.html) to the markdown parser.
