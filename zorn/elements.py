@@ -98,6 +98,10 @@ class Website:
             if 'markdown_extensions' in settings_keys \
             else ''
 
+        self.site_dir = settings['site_dir'] \
+            if 'site_dir' in settings \
+            else self.root_dir
+
         self.title = settings['site_title'] \
             if 'site_title' in settings_keys \
             else self.project_name
@@ -190,18 +194,18 @@ class Website:
 
             if self.url_style == 'flat' or page.type == 'main':
                 with open(os.path.join(
-                        self.root_dir,
+                        self.site_dir,
                         '{0}.html'.format(page.file_name)
                 ), 'w') as f:
                     f.write(html)
             else:
                 if not os.path.exists(
-                        os.path.join(self.root_dir, parent_page.file_name)
+                        os.path.join(self.site_dir, parent_page.file_name)
                 ):
                     os.mkdir(
-                        os.path.join(self.root_dir, parent_page.file_name))
+                        os.path.join(self.site_dir, parent_page.file_name))
                 with open(os.path.join(
-                        self.root_dir,
+                        self.site_dir,
                         '{0}/{1}.html'.format(parent_page.file_name,
                                               page.file_name)
                 ), 'w') as f:
