@@ -20,7 +20,7 @@ gulp.task('sass', function () {
 
 // Content
 
-gulp.task('generate', shell.task(['python admin.py generate']))
+gulp.task('generate', shell.task(['python3 admin.py generate']))
 
 // Compile for production environment
 
