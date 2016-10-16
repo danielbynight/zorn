@@ -1,11 +1,9 @@
 import getpass
-import importlib
+import importlib.util
 import os
 import shutil
-from distutils.sysconfig import get_python_lib
 import jinja2
 import json
-
 import sys
 
 import zorn.elements
@@ -35,9 +33,15 @@ def process_request(args):
 
 
 def process_settings():
+
     if os.environ['ZORN_SETTINGS'] is None:
         raise NotAZornProjectError('You are not inside a zorn project!')
-    module = importlib.import_module(os.environ['ZORN_SETTINGS'])
+    spec = importlib.util.spec_from_file_location(
+        os.environ['ZORN_SETTINGS'],
+        os.environ['ZORN_SETTINGS_PATH']
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
     settings = {}
     for setting in module.__dict__.keys():
         if setting.upper() == setting:
