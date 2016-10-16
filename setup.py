@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname):
@@ -15,8 +15,9 @@ setup(
     license='MIT',
     keywords='static website generator',
     url='http://controlledflame.com',
-    packages=['zorn'],
+    packages=find_packages(),
     include_package_data=True,
+    zip_safe=False,
     scripts=['bin/zorn'],
     # entry_points={'console_scripts': [
     #     'zorn = zorn.cli:process_request',
