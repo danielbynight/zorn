@@ -10,3 +10,4 @@ activate
 example/
 test/
 **/.DS_Store
+docs/node_modules
