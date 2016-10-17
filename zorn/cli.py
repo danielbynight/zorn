@@ -178,8 +178,7 @@ class Create(Command):
                 author = input(
                     'Who is the site author? ({0}) '.format(temp_author)
                 )
-                if author.strip() == '':
-                    self.author = temp_author
+                self.autor = temp_author if author.strip() == '' else author
 
                 style = input('Choose a style - basic or soprano (basic): ')
                 while style not in Create._styles:
