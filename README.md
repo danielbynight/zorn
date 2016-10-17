@@ -113,16 +113,24 @@ Note: the stylesheets location may have to be updated in the gulpfile (for examp
 *Pages*
 Registed the pages of your website as a list of `zorn.elements.Page` objects under the setting `PAGES`.
 If you want some nesting then register the subpages as a list of `zorn.elements.SubPage` objects under the parent page.
+If you want to generate a page which doesn't feature in the top navigation, register it as an `UnlinkedPage`.
 The first argument of a `Page` or `SubPage` is the page's title and the second argument is a string which is going to be used to name the page's files (html and md).
+An `UnlinkedPage` takes as a third argument the pieces of its path.
 The order the pages appear in the navigation is taken from the order of pages in these lists.
 Example:
 
     PAGES = [
+        # main pages
         elements.Page('Home', 'index'),
         elements.Page('Page 1', 'page1'),
         elements.Page('Page 2', 'page2', [
+            
+            # pages nested under Page 2
             elements.SubPage('Sub Page 1', 'subpage1'),
             elements.SubPage('Sub Page 2', 'subpage2'),
         ]),
         elements.Page('Page 3', 'page3'),
+        
+        # creates an unlinked page under the url domain/path/to/unlinked
+        elements.UnlinkedPage('Unlinked Page, 'unlinked', ['path', 'to']
     ]
