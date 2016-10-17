@@ -167,14 +167,14 @@ class Create(Command):
                 self.project_name = project_name
                 self.root_dir = os.path.join(self.cwd, project_name)
 
-                temp_site_title = project_name.capitalize() \
+                self.site_title = project_name.capitalize() \
                     .replace('-', ' ') \
                     .replace('_', ' ')
                 site_title = input(
-                    'Give your site a title ({0}): '.format(temp_site_title)
+                    'Give your site a title ({0}): '.format(self.site_title)
                 )
-                if site_title.strip() == '':
-                    self.site_title = temp_site_title
+                if site_title.strip() != '':
+                    self.site_title = site_title
 
                 author = input(
                     'Who is the site author? ({0}) '.format(self.author)
