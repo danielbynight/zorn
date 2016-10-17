@@ -140,6 +140,10 @@ class Create(Command):
         if '-s' in self.flags or '--silent' in self.flags:
             self.silent = True
 
+        # Defaults
+        self.author = getpass.getuser()
+        self.style = 'basic'
+
         # If a project name was passed as an argument,
         # create the site based on it
         arguments = [arg for arg in args if arg[0] != '-']
@@ -149,8 +153,6 @@ class Create(Command):
             self.site_title = self.project_name.capitalize() \
                 .replace('-', ' ') \
                 .replace('_', ' ')
-            self.author = getpass.getuser()
-            self.style = 'basic'
         else:
             # Get variables
             try:
@@ -165,21 +167,20 @@ class Create(Command):
                 self.project_name = project_name
                 self.root_dir = os.path.join(self.cwd, project_name)
 
-                temp_site_title = project_name.capitalize() \
+                self.site_title = project_name.capitalize() \
                     .replace('-', ' ') \
                     .replace('_', ' ')
                 site_title = input(
-                    'Give your site a title ({0}): '.format(temp_site_title)
+                    'Give your site a title ({0}): '.format(self.site_title)
                 )
-                if site_title.strip() == '':
-                    self.site_title = temp_site_title
+                if site_title.strip() != '':
+                    self.site_title = site_title
 
-                temp_author = getpass.getuser()
                 author = input(
-                    'Who is the site author? ({0}) '.format(temp_author)
+                    'Who is the site author? ({0}) '.format(self.author)
                 )
-                if author.strip() == '':
-                    self.author = temp_author
+                if author.strip() != '':
+                    self.author = author
 
                 style = input('Choose a style - basic or soprano (basic): ')
                 while style not in Create._styles:
@@ -188,9 +189,8 @@ class Create(Command):
                     for style in Create._styles:
                         self.communicate('\t' + style)
                     style = input('Choose a style (basic): ')
-                if style == '':
-                    style = 'basic'
-                self.style = style
+                if style != '':
+                    self.style = style
 
             except KeyboardInterrupt:
                 sys.exit(
