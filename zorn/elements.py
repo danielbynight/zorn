@@ -16,11 +16,6 @@ class SettingNotFoundError(Exception):
 
 
 class Page:
-    TYPE_MAIN = 'main'
-    TYPE_SUB = 'sub_page'
-    TYPE_UNLINKED = 'unlinked'
-
-    type = 'main'
 
     def __init__(self, title, file_name, sub_pages=None):
         self.title = title
@@ -51,14 +46,12 @@ class Page:
 
 class SubPage(Page):
     """A helper class to avoid attempts of creation of sub-sub pages"""
-    type = Page.TYPE_SUB
 
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
 
 
 class UnlinkedPage(Page):
-    type = Page.TYPE_UNLINKED
 
     def __init__(self, title, file_name, path=None):
         super().__init__(title, file_name, [])
@@ -181,17 +174,17 @@ class Website:
 
             css_file = 'main.css' if self.debug is True else 'main.min.css'
             css_path = './' + css_file
-            if page.type == Page.TYPE_SUB and self.url_style == 'nested':
+            if type(page) is SubPage and self.url_style == 'nested':
                 css_path = '../' + css_file
-            elif page.type == Page.TYPE_UNLINKED:
+            elif type(page) is UnlinkedPage:
                 css_path = ''.join(['../' for _ in range(len(page.path))]) \
                            + css_file
 
             back_path = ''.join(['../' for _ in range(len(page.path))]) \
-                if page.type == Page.TYPE_UNLINKED else '../'
+                if type(page) is UnlinkedPage else '../'
 
             pages = [
-                page for page in self.pages if page.type == Page.TYPE_MAIN
+                page for page in self.pages if type(page) is Page
                 ]
 
             html = self.pages[0].render_html({
@@ -203,7 +196,7 @@ class Website:
                 'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
                 'back_path': back_path,
-                'page_type': page.type,
+                'page_type': type(page).__name__,
                 'body_content': body_content,
                 'footer_content': footer_content,
                 'pages': pages,
@@ -212,13 +205,13 @@ class Website:
                 'css_path': css_path,
             }, self.templates_dir)
 
-            if self.url_style == 'flat' or page.type == Page.TYPE_MAIN:
+            if self.url_style == 'flat' or type(page) is Page:
                 with open(os.path.join(
                         self.site_dir,
                         '{0}.html'.format(page.file_name)
                 ), 'w') as f:
                     f.write(html)
-            elif page.type == Page.TYPE_SUB:
+            elif type(page) is SubPage:
                 if not os.path.exists(
                         os.path.join(self.site_dir, parent_page.file_name)
                 ):
@@ -230,7 +223,7 @@ class Website:
                                               page.file_name)
                 ), 'w') as f:
                     f.write(html)
-            elif page.type == Page.TYPE_UNLINKED:
+            elif type(page) is UnlinkedPage:
                 final_dir = self.site_dir
                 for partial in page.path:
                     if not os.path.exists(os.path.join(final_dir, partial)):
