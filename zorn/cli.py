@@ -196,7 +196,7 @@ class Create(Command):
                 sys.exit(
                     '\n\n' +
                     CliColors.ERROR +
-                    'You have interrupted the creation of a new zorn project.\n' +
+                    'You have interrupted the creation of a new project.\n' +
                     CliColors.SUCESS +
                     'No worries, it\'s ok to change your mind. Bye!\n' +
                     CliColors.RESET
