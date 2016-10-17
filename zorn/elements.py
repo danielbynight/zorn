@@ -16,7 +16,6 @@ class SettingNotFoundError(Exception):
 
 
 class Page:
-    type = 'main'
 
     def __init__(self, title, file_name, sub_pages=None):
         self.title = title
@@ -33,6 +32,15 @@ class Page:
 
         self.sub_pages = sub_pages
 
+    def generate_content_menu(self, url_style):
+        content = '#' + self.title + '\n'
+        for sub_page in self.sub_pages:
+            url = './{0}/{1}.html'.format(self.file_name, sub_page.file_name) \
+                if url_style == 'nested' \
+                else './{0}.html'.format(sub_page.file_name)
+            content += '- [{0}]({1})\n'.format(sub_page.title, url)
+        return content
+
     def __str__(self):
         return self.title
 
@@ -47,10 +55,20 @@ class Page:
 
 class SubPage(Page):
     """A helper class to avoid attempts of creation of sub-sub pages"""
-    type = 'sub_page'
 
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
+
+
+class UnlinkedPage(Page):
+
+    def __init__(self, title, file_name, path=None):
+        super().__init__(title, file_name, [])
+        if path is None:
+            self.path = []
+        elif type(path) == str:
+            self.path = path.split('/')
+        self.path = path
 
 
 class Website:
@@ -98,6 +116,10 @@ class Website:
             if 'markdown_extensions' in settings_keys \
             else ''
 
+        self.site_dir = settings['site_dir'] \
+            if 'site_dir' in settings \
+            else self.root_dir
+
         self.title = settings['site_title'] \
             if 'site_title' in settings_keys \
             else self.project_name
@@ -136,6 +158,7 @@ class Website:
                                for parent_page in self.pages
                                if page in parent_page.sub_pages].pop()
 
+            # get page content
             if os.path.isfile(os.path.join(self.markdown_dir,
                                            '{0}.md'.format(page.file_name))):
                 with open(os.path.join(self.markdown_dir,
@@ -143,6 +166,12 @@ class Website:
                     body_content = f.read()
                     body_content = markdown.markdown(
                         body_content,
+                        extensions=self.markdown_extensions
+                    )
+            elif type(page) is Page and page.sub_pages != []:
+                # Create menu-page in case no content was set for this page
+                body_content = markdown.markdown(
+                        page.generate_content_menu(self.url_style),
                         extensions=self.markdown_extensions
                     )
             else:
@@ -158,18 +187,21 @@ class Website:
                 active_nav_links.append(parent_page.title)
 
             # generate css path
-            if self.debug is True:
-                if page.type == 'main':
-                    css_path = './main.css'
-                else:
-                    css_path = './main.css' if self.url_style == 'flat' \
-                        else '../main.css'
-            else:
-                if page.type == 'main':
-                    css_path = './main.min.css'
-                else:
-                    css_path = './main.css' if self.url_style == 'flat' \
-                        else '../main.min.css'
+
+            css_file = 'main.css' if self.debug is True else 'main.min.css'
+            css_path = './' + css_file
+            if type(page) is SubPage and self.url_style == 'nested':
+                css_path = '../' + css_file
+            elif type(page) is UnlinkedPage:
+                css_path = ''.join(['../' for _ in range(len(page.path))]) \
+                           + css_file
+
+            back_path = ''.join(['../' for _ in range(len(page.path))]) \
+                if type(page) is UnlinkedPage else '../'
+
+            pages = [
+                page for page in self.pages if type(page) is Page
+                ]
 
             html = self.pages[0].render_html({
                 'debug': self.debug,
@@ -179,30 +211,42 @@ class Website:
                 'site_title': self.title,
                 'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
-                'page_type': page.type,
+                'back_path': back_path,
+                'page_type': type(page).__name__,
                 'body_content': body_content,
                 'footer_content': footer_content,
-                'pages': [page for page in self.pages if page.type == 'main'],
+                'pages': pages,
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
                 'css_path': css_path,
             }, self.templates_dir)
 
-            if self.url_style == 'flat' or page.type == 'main':
+            if self.url_style == 'flat' or type(page) is Page:
                 with open(os.path.join(
-                        self.root_dir,
+                        self.site_dir,
                         '{0}.html'.format(page.file_name)
                 ), 'w') as f:
                     f.write(html)
-            else:
+            elif type(page) is SubPage:
                 if not os.path.exists(
-                        os.path.join(self.root_dir, parent_page.file_name)
+                        os.path.join(self.site_dir, parent_page.file_name)
                 ):
                     os.mkdir(
-                        os.path.join(self.root_dir, parent_page.file_name))
+                        os.path.join(self.site_dir, parent_page.file_name))
                 with open(os.path.join(
-                        self.root_dir,
+                        self.site_dir,
                         '{0}/{1}.html'.format(parent_page.file_name,
                                               page.file_name)
+                ), 'w') as f:
+                    f.write(html)
+            elif type(page) is UnlinkedPage:
+                final_dir = self.site_dir
+                for partial in page.path:
+                    if not os.path.exists(os.path.join(final_dir, partial)):
+                        os.mkdir(os.path.join(final_dir, partial))
+                    final_dir = os.path.join(final_dir, partial)
+                with open(os.path.join(
+                        final_dir,
+                        '{0}.html'.format(page.file_name)
                 ), 'w') as f:
                     f.write(html)

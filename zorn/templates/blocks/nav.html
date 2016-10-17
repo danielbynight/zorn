@@ -6,10 +6,10 @@
                 {% if url_style == 'flat' %}
                 <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
                 {% else %}
-                    {% if page_type == 'main' %}
+                    {% if page_type == 'Page' %}
                 <a href="./{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
                     {% else %}
-                <a href="../{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
+                <a href="{{ back_path }}{{ page.file_name }}.html" {% if page.title in active_nav_links %}class="active"{% endif %}>{{ page.title }}</a>
                     {% endif %}
                 {% endif %}
             {% if page.sub_pages != [] %}
@@ -19,10 +19,10 @@
                     {% if url_style == 'flat' %}
                     <a href="./{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
                     {% else %}
-                        {% if page_type == 'main' %}
+                        {% if page_type == 'Page' %}
                     <a href="./{{ page.file_name }}/{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
                         {% else %}
-                    <a href="../{{ page.file_name }}/{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
+                    <a href="{{ back_path }}{{ page.file_name }}/{{ sub_page.file_name }}.html"{% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
                         {% endif %}
                     {% endif %}
                 </li>

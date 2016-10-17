@@ -1,5 +1,6 @@
 import os
 from setuptools import setup, find_packages
+from zorn import VERSION
 
 
 def read(fname):
@@ -8,7 +9,7 @@ def read(fname):
 
 setup(
     name='zorn',
-    version='0.0.1',
+    version=VERSION,
     author='Daniel Matias Ferrer',
     author_email='controlledflame@gmail.com',
     description='A static website generator with personality.',
