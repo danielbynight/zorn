@@ -32,6 +32,15 @@ class Page:
 
         self.sub_pages = sub_pages
 
+    def generate_content_menu(self, url_style):
+        content = '#' + self.title + '\n'
+        for sub_page in self.sub_pages:
+            url = './{0}/{1}.html'.format(self.file_name, sub_page.file_name) \
+                if url_style == 'nested' \
+                else './{0}.html'.format(sub_page.file_name)
+            content += '- [{0}]({1})\n'.format(sub_page.title, url)
+        return content
+
     def __str__(self):
         return self.title
 
@@ -149,6 +158,7 @@ class Website:
                                for parent_page in self.pages
                                if page in parent_page.sub_pages].pop()
 
+            # get page content
             if os.path.isfile(os.path.join(self.markdown_dir,
                                            '{0}.md'.format(page.file_name))):
                 with open(os.path.join(self.markdown_dir,
@@ -156,6 +166,12 @@ class Website:
                     body_content = f.read()
                     body_content = markdown.markdown(
                         body_content,
+                        extensions=self.markdown_extensions
+                    )
+            elif type(page) is Page and page.sub_pages != []:
+                # Create menu-page in case no content was set for this page
+                body_content = markdown.markdown(
+                        page.generate_content_menu(self.url_style),
                         extensions=self.markdown_extensions
                     )
             else:
