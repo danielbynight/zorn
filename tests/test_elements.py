@@ -6,3 +6,5 @@ def test_page():
     assert page.title == 'Test'
     assert page.file_name == 'test'
     assert page.sub_pages == []
+
+def test
