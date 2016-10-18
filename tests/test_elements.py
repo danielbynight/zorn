@@ -1,5 +1,6 @@
 from zorn import elements
 
+
 def test_page():
     page = elements.Page('Test', 'test')
     assert page.title == 'Test'
