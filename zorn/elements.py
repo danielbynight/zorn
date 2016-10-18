@@ -16,7 +16,6 @@ class SettingNotFoundError(Exception):
 
 
 class Page:
-
     def __init__(self, title, file_name, sub_pages=None):
         self.title = title
         self.file_name = file_name
@@ -25,10 +24,7 @@ class Page:
 
         for sub_page in sub_pages:
             if type(sub_page) is not SubPage:
-                raise PageError(
-                    'All elements of submenu have to be of type '
-                    'zorn.Elements.SubPage'
-                )
+                raise PageError('All elements of submenu have to be of type zorn.Elements.SubPage')
 
         self.sub_pages = sub_pages
 
@@ -48,8 +44,7 @@ class Page:
     def render_html(context, templates_dir):
         env = jinja2.Environment()
         env.loader = jinja2.FileSystemLoader(templates_dir)
-        template = env.get_template(
-            os.path.join('structure.html'))
+        template = env.get_template(os.path.join('structure.html'))
         return template.render(context)
 
 
@@ -61,7 +56,6 @@ class SubPage(Page):
 
 
 class UnlinkedPage(Page):
-
     def __init__(self, title, file_name, path=None):
         super().__init__(title, file_name, [])
         if path is None:
@@ -79,65 +73,47 @@ class Website:
         # Non-optional settings
         if 'root_dir' not in settings_keys:
             module_name = os.environ['ZORN_SETTINGS']
-            raise SettingNotFoundError(
-                'ROOT_DIR has to be set in the settings module ({0}).'.
-                format(module_name)
-            )
+            raise SettingNotFoundError('ROOT_DIR has to be set in the settings module ({0}).'.format(module_name))
         self.root_dir = settings['root_dir']
 
         if 'project_name' not in settings_keys:
             module_name = os.environ['ZORN_SETTINGS']
-            raise SettingNotFoundError(
-                'PROJECT_NAME has to be set in the settings module ({0}).'.
-                format(module_name)
-            )
+            raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module ({0}).'.format(module_name))
         self.project_name = settings['project_name']
 
         # Optional settings
         self.debug = settings['debug'] if 'debug' in settings_keys else False
 
-        self.url_style = settings['url_style'] \
-            if 'url_style' in settings_keys \
-            else 'flat'
+        self.url_style = settings['url_style'] if 'url_style' in settings_keys else 'flat'
 
         if self.url_style not in ['flat', 'nested']:
             self.url_style = 'flat'
 
-        self.templates_dir = settings['templates_dir'] \
-            if 'templates_dir' in settings_keys \
-            else os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              'templates')
+        self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
+            else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
-        self.markdown_dir = settings['markdown_dir'] \
-            if 'markdown_dir' in settings_keys \
+        self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
 
-        self.markdown_extensions = settings['markdown_extensions'] \
-            if 'markdown_extensions' in settings_keys \
+        self.markdown_extensions = settings['markdown_extensions'] if 'markdown_extensions' in settings_keys \
             else ''
 
-        self.site_dir = settings['site_dir'] \
-            if 'site_dir' in settings \
+        self.site_dir = settings['site_dir'] if 'site_dir' in settings \
             else self.root_dir
 
-        self.title = settings['site_title'] \
-            if 'site_title' in settings_keys \
+        self.title = settings['site_title'] if 'site_title' in settings_keys \
             else self.project_name
 
-        self.subtitle = settings['site_subtitle'] \
-            if 'site_subtitle' in settings_keys \
+        self.subtitle = settings['site_subtitle'] if 'site_subtitle' in settings_keys \
             else ''
 
-        self.description = settings['description'] \
-            if 'description' in settings_keys \
+        self.description = settings['description'] if 'description' in settings_keys \
             else ''
 
-        self.author = settings['author'] \
-            if 'author' in settings_keys \
+        self.author = settings['author'] if 'author' in settings_keys \
             else ''
 
-        self.keywords = settings['keywords'] \
-            if 'keywords' in settings_keys \
+        self.keywords = settings['keywords'] if 'keywords' in settings_keys \
             else ''
 
         all_pages = []
@@ -154,15 +130,11 @@ class Website:
             # get parent page in case of sub page
             parent_page = ''
             if type(page) is SubPage:
-                parent_page = [parent_page
-                               for parent_page in self.pages
-                               if page in parent_page.sub_pages].pop()
+                parent_page = [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
 
             # get page content
-            if os.path.isfile(os.path.join(self.markdown_dir,
-                                           '{0}.md'.format(page.file_name))):
-                with open(os.path.join(self.markdown_dir,
-                                       '{0}.md'.format(page.file_name))) as f:
+            if os.path.isfile(os.path.join(self.markdown_dir, '{0}.md'.format(page.file_name))):
+                with open(os.path.join(self.markdown_dir, '{0}.md'.format(page.file_name))) as f:
                     body_content = f.read()
                     body_content = markdown.markdown(
                         body_content,
@@ -171,14 +143,13 @@ class Website:
             elif type(page) is Page and page.sub_pages != []:
                 # Create menu-page in case no content was set for this page
                 body_content = markdown.markdown(
-                        page.generate_content_menu(self.url_style),
-                        extensions=self.markdown_extensions
-                    )
+                    page.generate_content_menu(self.url_style),
+                    extensions=self.markdown_extensions
+                )
             else:
                 body_content = ''
 
-            footer_content = '&copy; {0} {1}'.format(
-                datetime.datetime.now().year, self.author)
+            footer_content = '&copy; {0} {1}'.format(datetime.datetime.now().year, self.author)
 
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.title]
@@ -193,15 +164,11 @@ class Website:
             if type(page) is SubPage and self.url_style == 'nested':
                 css_path = '../' + css_file
             elif type(page) is UnlinkedPage:
-                css_path = ''.join(['../' for _ in range(len(page.path))]) \
-                           + css_file
+                css_path = ''.join(['../' for _ in range(len(page.path))]) + css_file
 
-            back_path = ''.join(['../' for _ in range(len(page.path))]) \
-                if type(page) is UnlinkedPage else '../'
+            back_path = ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../'
 
-            pages = [
-                page for page in self.pages if type(page) is Page
-                ]
+            pages = [page for page in self.pages if type(page) is Page]
 
             html = self.pages[0].render_html({
                 'debug': self.debug,
@@ -222,22 +189,14 @@ class Website:
             }, self.templates_dir)
 
             if self.url_style == 'flat' or type(page) is Page:
-                with open(os.path.join(
-                        self.site_dir,
-                        '{0}.html'.format(page.file_name)
-                ), 'w') as f:
+                with open(os.path.join(self.site_dir, '{0}.html'.format(page.file_name)), 'w') as f:
                     f.write(html)
             elif type(page) is SubPage:
-                if not os.path.exists(
-                        os.path.join(self.site_dir, parent_page.file_name)
-                ):
-                    os.mkdir(
-                        os.path.join(self.site_dir, parent_page.file_name))
-                with open(os.path.join(
-                        self.site_dir,
-                        '{0}/{1}.html'.format(parent_page.file_name,
-                                              page.file_name)
-                ), 'w') as f:
+                if not os.path.exists(os.path.join(self.site_dir, parent_page.file_name)):
+                    os.mkdir(os.path.join(self.site_dir, parent_page.file_name))
+                with open(
+                        os.path.join(self.site_dir, '{0}/{1}.html'.format(parent_page.file_name, page.file_name)),
+                        'w') as f:
                     f.write(html)
             elif type(page) is UnlinkedPage:
                 final_dir = self.site_dir
@@ -245,8 +204,5 @@ class Website:
                     if not os.path.exists(os.path.join(final_dir, partial)):
                         os.mkdir(os.path.join(final_dir, partial))
                     final_dir = os.path.join(final_dir, partial)
-                with open(os.path.join(
-                        final_dir,
-                        '{0}.html'.format(page.file_name)
-                ), 'w') as f:
+                with open(os.path.join(final_dir, '{0}.html'.format(page.file_name)), 'w') as f:
                     f.write(html)
