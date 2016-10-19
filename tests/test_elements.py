@@ -148,3 +148,17 @@ def test_website_with_no_defaults():
     assert website.author == 'Test Author'
     assert website.keywords == 'test keyword'
     assert website.pages == pages
+
+
+def test_website_error_with_no_root_dir():
+    with pytest.raises(elements.SettingNotFoundError):
+        website = elements.Website({            # noqa: ignore=F841
+            'project_name': 'test_project_name',
+        })
+
+
+def test_website_error_with_no_project_name():
+    with pytest.raises(elements.SettingNotFoundError):
+        website = elements.Website({            # noqa: ignore=F841
+            'root_dir': 'test_root_dir',
+        })
