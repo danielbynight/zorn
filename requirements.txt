@@ -1,3 +1,4 @@
+coverage==4.0.3
 flake8==3.0.4
 Jinja2==2.8
 linecache2==1.0.0
@@ -8,7 +9,9 @@ py==1.4.31
 pycodestyle==2.0.0
 pyflakes==1.2.3
 pytest==3.0.3
+python-coveralls==2.9.0
+PyYAML==3.12
+requests==2.11.1
 six==1.10.0
 traceback2==1.4.0
 unittest2==1.1.0
--e git+git@github.com:xassbit/zorn.git@fd9411ad434f70c3c78287d72386ead66c63264a#egg=zorn
