@@ -1,5 +1,6 @@
 from zorn import elements
 import pytest
+import os
 
 
 def test_page():
@@ -19,7 +20,7 @@ def test_page_with_sub_pages():
 
 def test_page_raises_error_if_sub_page_is_not_a_sub_page():
     with pytest.raises(elements.PageError):
-        page = elements.Page('Test', 'test', [elements.Page('Fail', 'fail')]) # noqa: ignore=F841
+        page = elements.Page('Test', 'test', [elements.Page('Fail', 'fail')])  # noqa: ignore=F841
 
 
 def test_page_generate_content_menu_with_flat_url_style():
@@ -43,6 +44,13 @@ def test_page_generate_content_menu_with_nested_url_style():
                   '3](./test/subpage3.html)\n'
     assert result_menu == page.generate_content_menu('nested')
 
+
 def test_page_casting_to_string():
     page = elements.Page('Test', 'test')
     assert str(page) == 'Test'
+
+
+def test_page_render_html():
+    templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+    test_content = elements.Page.render_html({'test_content': 'This is a test.'}, templates_dir)
+    assert test_content == 'This is a test.'
