@@ -54,3 +54,28 @@ def test_page_render_html():
     templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
     test_content = elements.Page.render_html({'test_content': 'This is a test.'}, templates_dir)
     assert test_content == 'This is a test.'
+
+
+def test_subpage():
+    sub_page = elements.SubPage('Test', 'test')
+    assert sub_page.title == 'Test'
+    assert sub_page.file_name == 'test'
+
+
+def test_subpage_cannot_have_subpages():
+    with pytest.raises(TypeError):
+        sub_page = elements.SubPage('Test', 'test', [elements.SubPage('Test', 'test')])  # noqa: ignore=F841
+
+
+def test_unlinkedpage():
+    unlinked_page = elements.UnlinkedPage('Test', 'test', ['path', 'to', 'page'])
+    assert unlinked_page.title == 'Test'
+    assert unlinked_page.file_name == 'test'
+    assert unlinked_page.path == ['path', 'to', 'page']
+
+
+def test_unlinkedpage_with_path_as_string():
+    unlinked_page = elements.UnlinkedPage('Test', 'test', 'path/to/page')
+    assert unlinked_page.title == 'Test'
+    assert unlinked_page.file_name == 'test'
+    assert unlinked_page.path == ['path', 'to', 'page']

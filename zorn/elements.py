@@ -61,7 +61,7 @@ class UnlinkedPage(Page):
         if path is None:
             self.path = []
         elif type(path) == str:
-            self.path = path.split('/')
+            path = path.split('/')
         self.path = path
 
 
