@@ -6,3 +6,5 @@ before_script:
   - flake8
 script:
   - pytest tests
+after_success:
+  - coveralls
