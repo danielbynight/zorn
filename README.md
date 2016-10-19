@@ -1,4 +1,6 @@
 # Zorn - a static website generator with personality
+[![Build Status](https://travis-ci.org/xassbit/zorn.svg?branch=master)](https://travis-ci.org/xassbit/zorn)
+[![Coverage Status](https://coveralls.io/repos/github/xassbit/zorn/badge.svg?branch=master)](https://coveralls.io/github/xassbit/zorn?branch=master)
 
 Zorn generates static websites which can then be served through a CDN.
 It was optimized to work with github pages. It supports:

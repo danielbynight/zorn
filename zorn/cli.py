@@ -33,7 +33,6 @@ def process_request(args):
 
 
 def process_settings():
-
     if os.environ['ZORN_SETTINGS'] is None:
         raise NotAZornProjectError('You are not inside a zorn project!')
     spec = importlib.util.spec_from_file_location(
@@ -74,18 +73,11 @@ class Command:
         self.flags = [flag for flag in args if flag[0] == '-']
         for flag in self.flags:
             if flag not in self._available_flags:
-                raise UnrecognizedFlagError(
-                    'I\'m afraid the flag "{0}" is not recognized.'
-                    .format(flag)
-                )
+                raise UnrecognizedFlagError('I\'m afraid the flag "{0}" is not recognized.'.format(flag))
         if len(args) > 2:
             self.args = [arg for arg in args[2:] if arg[0] != '-']
 
-        print(
-            CliColors.HEADER +
-            '\nWelcome to zorn!\n' +
-            CliColors.RESET
-        )
+        print(CliColors.HEADER + '\nWelcome to zorn!\n' + CliColors.RESET)
 
     def communicate(self, message):
         if self.silent is False:
@@ -95,12 +87,7 @@ class Command:
 class NotFound(Command):
     def __init__(self, args):
         super().__init__(args)
-        print(
-            CliColors.ERROR +
-            "I'm afraid I don't recognize the command " +
-            self.name +
-            CliColors.RESET
-        )
+        print(CliColors.ERROR + "I'm afraid I don't recognize the command " + self.name + CliColors.RESET)
 
 
 class Help(Command):
@@ -109,10 +96,8 @@ class Help(Command):
         print(CliColors.RESET + 'Available commands:\n')
         print('help - list available commands')
         print('create - start a new zorn project')
-        print('generate - generate the website (i.e. its html files)'
-              '- only avaialble through admin.py')
-        print('importtemplates - imports the templates locally'
-              '- only avaialble through admin.py')
+        print('generate - generate the website (i.e. its html files)- only avaialble through admin.py')
+        print('importtemplates - imports the templates locally- only avaialble through admin.py')
         print(CliColors.SUCESS + "\nAnd that's all\n")
 
 
@@ -150,16 +135,13 @@ class Create(Command):
         if len(arguments) > 2:
             self.project_name = arguments[2]
             self.root_dir = os.path.join(self.cwd, self.project_name)
-            self.site_title = self.project_name.capitalize() \
-                .replace('-', ' ') \
-                .replace('_', ' ')
+            self.site_title = self.project_name.capitalize().replace('-', ' ').replace('_', ' ')
         else:
             # Get variables
             try:
                 project_name = input('Give your project a name: ')
-                while project_name == '' or \
-                        ' ' in project_name or \
-                        os.path.exists(os.path.join(self.cwd, project_name)):
+                while project_name == '' or ' ' in project_name or os.path.exists(
+                        os.path.join(self.cwd, project_name)):
                     print('The project name cannot be empty or have spaces.')
                     print('Also, a directory with that name cannot exist yet.')
                     project_name = input('Give your project a name: ')
@@ -167,18 +149,12 @@ class Create(Command):
                 self.project_name = project_name
                 self.root_dir = os.path.join(self.cwd, project_name)
 
-                self.site_title = project_name.capitalize() \
-                    .replace('-', ' ') \
-                    .replace('_', ' ')
-                site_title = input(
-                    'Give your site a title ({0}): '.format(self.site_title)
-                )
+                self.site_title = project_name.capitalize().replace('-', ' ').replace('_', ' ')
+                site_title = input('Give your site a title ({0}): '.format(self.site_title))
                 if site_title.strip() != '':
                     self.site_title = site_title
 
-                author = input(
-                    'Who is the site author? ({0}) '.format(self.author)
-                )
+                author = input('Who is the site author? ({0}) '.format(self.author))
                 if author.strip() != '':
                     self.author = author
 
@@ -217,8 +193,7 @@ class Create(Command):
         self.create_dir('md')
 
         self.communicate('- adding index content')
-        md_content = '#Hello, world\n' \
-                     'you have successfully created the zorn project "{0}"!' \
+        md_content = '#Hello, world\nyou have successfully created the zorn project "{0}"!' \
             .format(self.project_name)
         self.add_file_with_content(os.path.join('md', 'index.md'), md_content)
 
@@ -244,28 +219,22 @@ class Create(Command):
         self.add_file_with_content('package.json', package_content)
 
         self.communicate('- adding gulpfile')
-        self.copy_file(
-            os.path.join('defaults', 'gulpfile.js'),
-            'gulpfile.js'
-        )
+        self.copy_file(os.path.join('defaults', 'gulpfile.js'), 'gulpfile.js')
 
         self.communicate('- adding style')
-        self.copy_dir(
-            os.path.join('styles', self.style),
-            'scss'
-        )
+        self.copy_dir(os.path.join('styles', self.style), 'scss')
 
-        auto_generate = input(
-            'Would you like to generate now your site - yes or no? (yes) '
-        )
+        if len(arguments) > 2:
+            auto_generate = 'no'
+        else:
+            auto_generate = input('Would you like to generate now your site - yes or no? (yes) ')
+
         if auto_generate != 'no':
             os.system(
                 'cd {0} && npm install --silent'.format(self.project_name))
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
         if auto_generate == 'no':
-            self.communicate(
-                'Now you can run "npm install" to generate the website!\n'
-            )
+            self.communicate('Now you can run "npm install" to generate the website!\n')
         print(CliColors.SUCESS + 'Good luck!' + CliColors.RESET + '\n')
 
     # Tasks
@@ -274,8 +243,7 @@ class Create(Command):
         os.mkdir(os.path.join(self.root_dir, dir_name))
 
     def add_file_from_template(self, file_name):
-        with open(os.path.join(self.script_dir, 'defaults', file_name)) \
-                as f:
+        with open(os.path.join(self.script_dir, 'defaults', file_name)) as f:
             raw_settings_content = f.read()
         template = jinja2.Template(raw_settings_content)
         settings_content = template.render({
@@ -311,23 +279,14 @@ class ImportTemplates(Command):
         print(CliColors.RESET + 'Importing templates...\n')
         settings = process_settings()
         if 'root_dir' not in settings.keys():
-            raise zorn.elements.SettingNotFoundError(
-                'Root dir not found in settings.'
-            )
+            raise zorn.elements.SettingNotFoundError('Root dir not found in settings.')
         shutil.copytree(
-            os.path.join(
-                os.path.dirname(os.path.abspath(__file__)),
-                'templates'
-            ),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
             os.path.join(settings['root_dir'], 'templates')
         )
 
         if '-u' in self.flags or '--update' in self.flags:
-            with open(
-                    os.path.join(settings['root_dir'], 'settings.py'
-                                 ), 'a') as f:
-                f.write(
-                    "\n\nTEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')"
-                )
+            with open(os.path.join(settings['root_dir'], 'settings.py'), 'a') as f:
+                f.write("\n\nTEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')")
 
         print(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
