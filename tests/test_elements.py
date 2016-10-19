@@ -79,3 +79,9 @@ def test_unlinkedpage_with_path_as_string():
     assert unlinked_page.title == 'Test'
     assert unlinked_page.file_name == 'test'
     assert unlinked_page.path == ['path', 'to', 'page']
+
+def test_unlinkedpage_without_path():
+    unlinked_page = elements.UnlinkedPage('Test', 'test')
+    assert unlinked_page.title == 'Test'
+    assert unlinked_page.file_name == 'test'
+    assert unlinked_page.path == []

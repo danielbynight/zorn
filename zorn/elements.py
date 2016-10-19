@@ -59,7 +59,7 @@ class UnlinkedPage(Page):
     def __init__(self, title, file_name, path=None):
         super().__init__(title, file_name, [])
         if path is None:
-            self.path = []
+            path = []
         elif type(path) == str:
             path = path.split('/')
         self.path = path
