@@ -151,6 +151,8 @@ def test_website_with_no_defaults():
 
 
 def test_website_error_with_no_root_dir():
+    if 'ZORN_SETTINGS' in os.environ:
+        del os.environ['ZORN_SETTINGS']
     with pytest.raises(elements.SettingNotFoundError):
         website = elements.Website({            # noqa: ignore=F841
             'project_name': 'test_project_name',
@@ -158,6 +160,8 @@ def test_website_error_with_no_root_dir():
 
 
 def test_website_error_with_no_project_name():
+    if 'ZORN_SETTINGS' in os.environ:
+        del os.environ['ZORN_SETTINGS']
     with pytest.raises(elements.SettingNotFoundError):
         website = elements.Website({            # noqa: ignore=F841
             'root_dir': 'test_root_dir',

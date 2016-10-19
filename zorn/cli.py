@@ -224,7 +224,11 @@ class Create(Command):
         self.communicate('- adding style')
         self.copy_dir(os.path.join('styles', self.style), 'scss')
 
-        auto_generate = input('Would you like to generate now your site - yes or no? (yes) ')
+        if len(arguments) > 2:
+            auto_generate = 'no'
+        else:
+            auto_generate = input('Would you like to generate now your site - yes or no? (yes) ')
+
         if auto_generate != 'no':
             os.system(
                 'cd {0} && npm install --silent'.format(self.project_name))
