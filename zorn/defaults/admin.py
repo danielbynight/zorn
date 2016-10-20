@@ -1,5 +1,4 @@
 import os
-
 import sys
 
 from zorn.cli import process_request

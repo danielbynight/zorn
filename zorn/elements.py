@@ -1,10 +1,8 @@
+import datetime
 import os
 
 import jinja2
-
 import markdown
-
-import datetime
 
 
 class PageError(Exception):
