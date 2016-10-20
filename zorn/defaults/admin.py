@@ -1,7 +1,6 @@
 import os
-import sys
 
-from zorn.cli import process_request
+from zorn.tasks import process_admin_request
 
 if __name__ == '__main__':
     os.environ.setdefault('ZORN_SETTINGS', 'settings')
@@ -9,4 +8,4 @@ if __name__ == '__main__':
         'ZORN_SETTINGS_PATH',
         os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.py')
     )
-    process_request(sys.argv)
+    process_admin_request()
