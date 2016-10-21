@@ -184,7 +184,16 @@ class Website:
                 'css_path': css_path,
             }, self.templates_dir)
 
-            if self.url_style == 'flat' or type(page) is Page:
+            if type(page) is UnlinkedPage:
+                final_dir = self.site_dir
+                for partial in page.path:
+                    if not os.path.exists(os.path.join(final_dir, partial)):
+                        os.mkdir(os.path.join(final_dir, partial))
+                    final_dir = os.path.join(final_dir, partial)
+                page_path = os.path.join(final_dir, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
+                    f.write(html)
+            elif self.url_style == 'flat' or type(page) is Page:
                 page_path = os.path.join(self.site_dir, '{0}.html'.format(page.file_name))
                 with open(page_path, 'w+') as f:
                     f.write(html)
@@ -193,14 +202,5 @@ class Website:
                 if not os.path.exists(page_dir_path):
                     os.mkdir(page_dir_path)
                 page_path = os.path.join(page_dir_path, '{0}.html'.format(page.file_name))
-                with open(page_path, 'w+') as f:
-                    f.write(html)
-            elif type(page) is UnlinkedPage:
-                final_dir = self.site_dir
-                for partial in page.path:
-                    if not os.path.exists(os.path.join(final_dir, partial)):
-                        os.mkdir(os.path.join(final_dir, partial))
-                    final_dir = os.path.join(final_dir, partial)
-                page_path = os.path.join(final_dir, '{0}.html'.format(page.file_name))
                 with open(page_path, 'w+') as f:
                     f.write(html)

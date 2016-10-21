@@ -169,3 +169,18 @@ def test_generate_subpage_nested():
     assert os.path.exists(subpage_path)
     os.remove(page_path)
     shutil.rmtree(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'test_page'))
+
+
+def test_generate_unlinked_page():
+    pages = [elements.UnlinkedPage('Unlinked Page', 'unlinked_page', ['sub_dir'])]
+    website = elements.Website({
+        'root_dir': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project'),
+        'project_name': 'test_project_name',
+        'pages': pages,
+    })
+    website.generate_pages()
+    subpage_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'sub_dir', 'unlinked_page.html'
+    )
+    assert os.path.exists(subpage_path)
+    shutil.rmtree(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'sub_dir'))
