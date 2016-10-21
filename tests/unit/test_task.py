@@ -77,6 +77,7 @@ def test_process_settings():
     processed_settings = tasks.AdminTask.process_settings()
     assert processed_settings == {'root_dir': 'test', 'other_setting': 'test test'}
 
+
 def test_raise_error_if_no_zorn_setting_path():
     del os.environ['ZORN_SETTINGS_PATH']
     with pytest.raises(tasks.NotAZornProjectError):
