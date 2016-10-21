@@ -93,3 +93,33 @@ def test_raise_error_if_no_root_dir_setting():
         tasks.AdminTask.process_settings()
 
 
+def test_create_with_defaults():
+    create_task = tasks.Create()
+    assert create_task.project_name is None
+    assert create_task.site_title is None
+    assert create_task.author is None
+    assert create_task.style is None
+    assert create_task.generate is False
+    assert create_task.cwd == os.getcwd()
+    assert create_task.root_dir is None
+
+
+def test_create_with_no_defaults():
+    create_task = tasks.Create(
+        project_name='test_project_name',
+        site_title='test_site_title',
+        author='Mrs. Test',
+        style='basic',
+        generate=True,
+        verbosity=0,
+    )
+    assert create_task.project_name == 'test_project_name'
+    assert create_task.site_title == 'test_site_title'
+    assert create_task.author == 'Mrs. Test'
+    assert create_task.style == 'basic'
+    assert create_task.generate is True
+
+
+def test_create_raise_error_if_style_is_not_recognized():
+    with pytest.raises(tasks.UnknownStyleError):
+        create_task = tasks.Create(style='blah')

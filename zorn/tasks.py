@@ -19,6 +19,10 @@ class NotAZornProjectError(Exception):
     pass
 
 
+class UnknownStyleError(Exception):
+    pass
+
+
 def process_admin_request():
     parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
     parser.add_argument('task', choices=ADMIN_TASKS.keys())
@@ -107,6 +111,8 @@ class Create(Task):
         self.site_title = site_title
         self.author = author
         self.style = style
+        if self.style not in Create.STYLES and self.style is not None:
+            raise UnknownStyleError('The style {0} is not recognized.'.format(style))
         self.generate = generate
 
         # Directories
