@@ -1,10 +1,8 @@
+import datetime
 import os
 
 import jinja2
-
 import markdown
-
-import datetime
 
 
 class PageError(Exception):
@@ -72,29 +70,17 @@ class Website:
 
         # Non-optional settings
         if 'root_dir' not in settings_keys:
-            if 'ZORN_SETTINGS' in os.environ:
-                module_name = os.environ['ZORN_SETTINGS']
-                raise SettingNotFoundError('ROOT_DIR has to be set in the settings module ({0}).'.format(module_name))
-            else:
-                raise SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
+            raise SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
         self.root_dir = settings['root_dir']
 
         if 'project_name' not in settings_keys:
-            if 'ZORN_SETTINGS' in os.environ:
-                module_name = os.environ['ZORN_SETTINGS']
-                raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module ({0}).'
-                                           .format(module_name))
-            else:
-                raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
+            raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
         self.project_name = settings['project_name']
 
         # Optional settings
         self.debug = settings['debug'] if 'debug' in settings_keys else False
 
         self.url_style = settings['url_style'] if 'url_style' in settings_keys else 'flat'
-
-        if self.url_style not in ['flat', 'nested']:
-            self.url_style = 'flat'
 
         self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
@@ -195,21 +181,23 @@ class Website:
                 'css_path': css_path,
             }, self.templates_dir)
 
-            if self.url_style == 'flat' or type(page) is Page:
-                with open(os.path.join(self.site_dir, '{0}.html'.format(page.file_name)), 'w') as f:
-                    f.write(html)
-            elif type(page) is SubPage:
-                if not os.path.exists(os.path.join(self.site_dir, parent_page.file_name)):
-                    os.mkdir(os.path.join(self.site_dir, parent_page.file_name))
-                with open(
-                        os.path.join(self.site_dir, '{0}/{1}.html'.format(parent_page.file_name, page.file_name)),
-                        'w') as f:
-                    f.write(html)
-            elif type(page) is UnlinkedPage:
+            if type(page) is UnlinkedPage:
                 final_dir = self.site_dir
                 for partial in page.path:
                     if not os.path.exists(os.path.join(final_dir, partial)):
                         os.mkdir(os.path.join(final_dir, partial))
                     final_dir = os.path.join(final_dir, partial)
-                with open(os.path.join(final_dir, '{0}.html'.format(page.file_name)), 'w') as f:
+                page_path = os.path.join(final_dir, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
+                    f.write(html)
+            elif self.url_style == 'flat' or type(page) is Page:
+                page_path = os.path.join(self.site_dir, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
+                    f.write(html)
+            elif type(page) is SubPage:
+                page_dir_path = os.path.join(self.site_dir, parent_page.file_name)
+                if not os.path.exists(page_dir_path):
+                    os.mkdir(page_dir_path)
+                page_path = os.path.join(page_dir_path, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
                     f.write(html)
