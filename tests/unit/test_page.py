@@ -86,4 +86,3 @@ def test_unlinkedpage_without_path():
     assert unlinked_page.title == 'Test'
     assert unlinked_page.file_name == 'test'
     assert unlinked_page.path == []
-
