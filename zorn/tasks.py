@@ -66,10 +66,10 @@ class Task:
 class AdminTask(Task):
     @staticmethod
     def process_settings():
-        if os.environ['ZORN_SETTINGS'] is None:
+        if 'ZORN_SETTINGS_PATH' not in os.environ.keys() or os.environ['ZORN_SETTINGS_PATH'] is None:
             raise NotAZornProjectError('You are not inside a zorn project!')
         spec = importlib.util.spec_from_file_location(
-            os.environ['ZORN_SETTINGS'],
+            'settings',
             os.environ['ZORN_SETTINGS_PATH']
         )
         settings_module = importlib.util.module_from_spec(spec)

@@ -1,5 +1,8 @@
+import os
 import sys
-from zorn import tasks
+
+import pytest
+from zorn import tasks, elements
 from io import StringIO
 
 
@@ -35,32 +38,55 @@ def test_parse_verbosity_verbose():
 
 def test_comunicate_standard_verbosity():
     task = tasks.Task(1)
-    stdout_ = sys.stdout
     stream = StringIO()
     sys.stdout = stream
     task.communicate('standard')
     task.communicate('verbose', False)
-    sys.stdout = stdout_
     assert stream.getvalue() == 'standard\n'
 
 
 def test_comunicate_silent():
     task = tasks.Task(0)
-    stdout_ = sys.stdout
     stream = StringIO()
     sys.stdout = stream
     task.communicate('standard')
     task.communicate('verbose', False)
-    sys.stdout = stdout_
     assert stream.getvalue() == ''
 
 
 def test_comunicate_verbose():
     task = tasks.Task(2)
-    stdout_ = sys.stdout
     stream = StringIO()
     sys.stdout = stream
     task.communicate('standard')
     task.communicate('verbose', False)
-    sys.stdout = stdout_
     assert stream.getvalue() == 'standard\nverbose\n'
+
+
+def test_admin_task():
+    task = tasks.AdminTask(1, True)
+    assert task.verbosity == 1
+    assert task.update is True
+
+
+def test_process_settings():
+    os.environ.setdefault(
+        'ZORN_SETTINGS_PATH',
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'settings.py')
+    )
+    processed_settings = tasks.AdminTask.process_settings()
+    assert processed_settings == {'root_dir': 'test', 'other_setting': 'test test'}
+
+def test_raise_error_if_no_zorn_setting_path():
+    del os.environ['ZORN_SETTINGS_PATH']
+    with pytest.raises(tasks.NotAZornProjectError):
+        tasks.AdminTask.process_settings()
+
+
+def test_raise_error_if_no_root_dir_setting():
+    os.environ.setdefault(
+        'ZORN_SETTINGS_PATH',
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'wrong_settings.py')
+    )
+    with pytest.raises(elements.SettingNotFoundError):
+        tasks.AdminTask.process_settings()

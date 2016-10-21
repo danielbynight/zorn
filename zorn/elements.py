@@ -82,9 +82,6 @@ class Website:
 
         self.url_style = settings['url_style'] if 'url_style' in settings_keys else 'flat'
 
-        if self.url_style not in ['flat', 'nested']:
-            self.url_style = 'flat'
-
         self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
