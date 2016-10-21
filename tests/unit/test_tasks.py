@@ -38,29 +38,29 @@ def test_parse_verbosity_verbose():
 
 def test_comunicate_standard_verbosity():
     task = tasks.Task(1)
-    stream = StringIO()
-    sys.stdout = stream
-    task.communicate('standard')
-    task.communicate('verbose', False)
-    assert stream.getvalue() == 'standard\n'
+    with StringIO() as stream:
+        sys.stdout = stream
+        task.communicate('standard')
+        task.communicate('verbose', False)
+        assert stream.getvalue() == 'standard\n'
 
 
 def test_comunicate_silent():
     task = tasks.Task(0)
-    stream = StringIO()
-    sys.stdout = stream
-    task.communicate('standard')
-    task.communicate('verbose', False)
-    assert stream.getvalue() == ''
+    with StringIO() as stream:
+        sys.stdout = stream
+        task.communicate('standard')
+        task.communicate('verbose', False)
+        assert stream.getvalue() == ''
 
 
 def test_comunicate_verbose():
     task = tasks.Task(2)
-    stream = StringIO()
-    sys.stdout = stream
-    task.communicate('standard')
-    task.communicate('verbose', False)
-    assert stream.getvalue() == 'standard\nverbose\n'
+    with StringIO() as stream:
+        sys.stdout = stream
+        task.communicate('standard')
+        task.communicate('verbose', False)
+        assert stream.getvalue() == 'standard\nverbose\n'
 
 
 def test_admin_task():
@@ -91,3 +91,5 @@ def test_raise_error_if_no_root_dir_setting():
     )
     with pytest.raises(elements.SettingNotFoundError):
         tasks.AdminTask.process_settings()
+
+
