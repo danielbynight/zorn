@@ -70,20 +70,11 @@ class Website:
 
         # Non-optional settings
         if 'root_dir' not in settings_keys:
-            if 'ZORN_SETTINGS' in os.environ:
-                module_name = os.environ['ZORN_SETTINGS']
-                raise SettingNotFoundError('ROOT_DIR has to be set in the settings module ({0}).'.format(module_name))
-            else:
-                raise SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
+            raise SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
         self.root_dir = settings['root_dir']
 
         if 'project_name' not in settings_keys:
-            if 'ZORN_SETTINGS' in os.environ:
-                module_name = os.environ['ZORN_SETTINGS']
-                raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module ({0}).'
-                                           .format(module_name))
-            else:
-                raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
+            raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
         self.project_name = settings['project_name']
 
         # Optional settings
