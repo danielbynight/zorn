@@ -185,7 +185,7 @@ class Website:
             }, self.templates_dir)
 
             if self.url_style == 'flat' or type(page) is Page:
-                with open(os.path.join(self.site_dir, '{0}.html'.format(page.file_name)), 'w') as f:
+                with open(os.path.join(self.site_dir, '{0}.html'.format(page.file_name)), 'w+') as f:
                     f.write(html)
             elif type(page) is SubPage:
                 if not os.path.exists(os.path.join(self.site_dir, parent_page.file_name)):
