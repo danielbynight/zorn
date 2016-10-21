@@ -79,7 +79,7 @@ class AdminTask(Task):
             if setting.upper() == setting:
                 settings[setting.lower()] = settings_module.__dict__[setting]
         if 'root_dir' not in settings.keys():
-            raise zorn.elements.SettingNotFoundError('The root dir setting wasn\'t found.')
+            raise zorn.elements.SettingNotFoundError("The root dir setting wasn't found.")
 
         return settings
 
@@ -158,7 +158,7 @@ class Create(Task):
                 CliColors.ERROR +
                 'You have interrupted the creation of a new project.\n' +
                 CliColors.SUCESS +
-                'No worries, it\'s ok to change your mind. Bye!\n' +
+                "No worries, it's ok to change your mind. Bye!\n" +
                 CliColors.RESET
             )
 
