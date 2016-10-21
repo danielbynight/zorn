@@ -185,14 +185,15 @@ class Website:
             }, self.templates_dir)
 
             if self.url_style == 'flat' or type(page) is Page:
-                with open(os.path.join(self.site_dir, '{0}.html'.format(page.file_name)), 'w+') as f:
+                page_path = os.path.join(self.site_dir, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
                     f.write(html)
             elif type(page) is SubPage:
-                if not os.path.exists(os.path.join(self.site_dir, parent_page.file_name)):
-                    os.mkdir(os.path.join(self.site_dir, parent_page.file_name))
-                with open(
-                        os.path.join(self.site_dir, '{0}/{1}.html'.format(parent_page.file_name, page.file_name)),
-                        'w') as f:
+                page_dir_path = os.path.join(self.site_dir, parent_page.file_name)
+                if not os.path.exists(page_dir_path):
+                    os.mkdir(page_dir_path)
+                page_path = os.path.join(page_dir_path, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
                     f.write(html)
             elif type(page) is UnlinkedPage:
                 final_dir = self.site_dir
@@ -200,5 +201,6 @@ class Website:
                     if not os.path.exists(os.path.join(final_dir, partial)):
                         os.mkdir(os.path.join(final_dir, partial))
                     final_dir = os.path.join(final_dir, partial)
-                with open(os.path.join(final_dir, '{0}.html'.format(page.file_name)), 'w') as f:
+                page_path = os.path.join(final_dir, '{0}.html'.format(page.file_name))
+                with open(page_path, 'w+') as f:
                     f.write(html)
