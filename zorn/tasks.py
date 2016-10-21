@@ -265,9 +265,6 @@ class Create(Task):
 
 
 class Generate(AdminTask):
-    def __init__(self, verbosity=1, update=False):
-        super().__init__(verbosity, update)
-
     def run(self):
         self.communicate(CliColors.RESET + 'Generating... \n')
         try:
@@ -279,9 +276,6 @@ class Generate(AdminTask):
 
 
 class ImportTemplates(AdminTask):
-    def __init__(self, verbosity=1, update=False):
-        super().__init__(verbosity, update)
-
     def run(self):
         self.communicate(CliColors.RESET + 'Importing templates...\n')
         settings = AdminTask.process_settings()
