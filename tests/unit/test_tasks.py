@@ -1,10 +1,11 @@
 import os
 import shutil
 import sys
+from io import StringIO
 
 import pytest
-from zorn import tasks, elements
-from io import StringIO
+
+from zorn import elements, tasks
 
 
 def test_task():

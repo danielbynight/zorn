@@ -1,6 +1,8 @@
-from zorn import elements
-import pytest
 import os
+
+import pytest
+
+from zorn import elements
 
 
 def test_page():
