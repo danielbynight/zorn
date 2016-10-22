@@ -8,20 +8,12 @@ import sys
 
 import jinja2
 
-import zorn.elements
+from zorn import elements, errors
 
 ADMIN_TASKS = {
     'generate': 'Generate',
     'importtemplates': 'ImportTemplates'
 }
-
-
-class NotAZornProjectError(Exception):
-    pass
-
-
-class UnknownStyleError(Exception):
-    pass
 
 
 def process_admin_request():
@@ -72,7 +64,7 @@ class AdminTask(Task):
     @staticmethod
     def process_settings():
         if 'ZORN_SETTINGS_PATH' not in os.environ.keys() or os.environ['ZORN_SETTINGS_PATH'] is None:
-            raise NotAZornProjectError('You are not inside a zorn project!')
+            raise errors.NotAZornProjectError('You are not inside a zorn project!')
         spec = importlib.util.spec_from_file_location(
             'settings',
             os.environ['ZORN_SETTINGS_PATH']
@@ -84,7 +76,7 @@ class AdminTask(Task):
             if setting.upper() == setting:
                 settings[setting.lower()] = settings_module.__dict__[setting]
         if 'root_dir' not in settings.keys():
-            raise zorn.elements.SettingNotFoundError("The root dir setting wasn't found.")
+            raise errors.SettingNotFoundError("The root dir setting wasn't found.")
 
         return settings
 
@@ -119,7 +111,7 @@ class Create(Task):
         self.author = author
         self.style = style
         if self.style not in Create.STYLES and self.style is not None:
-            raise UnknownStyleError('The style {0} is not recognized.'.format(style))
+            raise errors.UnknownStyleError('The style {0} is not recognized.'.format(style))
         self.generate = generate
 
         # Directories
@@ -276,7 +268,7 @@ class Generate(AdminTask):
     def run(self):
         self.communicate(CliColors.RESET + 'Generating... \n')
         try:
-            website = zorn.elements.Website(self.settings)
+            website = elements.Website(self.settings)
             website.generate_pages()
         except Exception as e:
             sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)

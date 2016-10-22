@@ -4,13 +4,7 @@ import os
 import jinja2
 import markdown
 
-
-class PageError(Exception):
-    pass
-
-
-class SettingNotFoundError(Exception):
-    pass
+from zorn import errors
 
 
 class Page:
@@ -22,7 +16,7 @@ class Page:
 
         for sub_page in sub_pages:
             if type(sub_page) is not SubPage:
-                raise PageError('All elements of submenu have to be of type zorn.Elements.SubPage')
+                raise errors.PageError('All elements of submenu have to be of type zorn.Elements.SubPage')
 
         self.sub_pages = sub_pages
 
@@ -70,11 +64,11 @@ class Website:
 
         # Non-optional settings
         if 'root_dir' not in settings_keys:
-            raise SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
+            raise errors.SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
         self.root_dir = settings['root_dir']
 
         if 'project_name' not in settings_keys:
-            raise SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
+            raise errors.SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
         self.project_name = settings['project_name']
 
         # Optional settings
