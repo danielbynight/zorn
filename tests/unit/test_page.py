@@ -66,7 +66,7 @@ def test_subpage():
 
 def test_subpage_cannot_have_subpages():
     with pytest.raises(TypeError):
-        sub_page = elements.SubPage('Test', 'test', [elements.SubPage('Test', 'test')])  # noqa: ignore=F841
+        elements.SubPage('Test', 'test', [elements.SubPage('Test', 'test')])
 
 
 def test_unlinkedpage():
