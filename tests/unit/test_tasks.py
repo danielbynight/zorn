@@ -97,6 +97,7 @@ def test_update_settings():
         f.write(original_settings)
     assert "TEST_SETTING = 'a test value'" in modified_settings
 
+
 def test_raise_error_if_no_zorn_setting_path():
     del os.environ['ZORN_SETTINGS_PATH']
     with pytest.raises(tasks.NotAZornProjectError):
