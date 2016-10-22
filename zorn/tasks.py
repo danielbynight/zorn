@@ -82,6 +82,7 @@ class AdminTask(Task):
         for setting in settings_module.__dict__.keys():
             if setting.upper() == setting:
                 settings[setting.lower()] = settings_module.__dict__[setting]
+        print(os.environ['ZORN_SETTINGS_PATH'])
         if 'root_dir' not in settings.keys():
             raise zorn.elements.SettingNotFoundError("The root dir setting wasn't found.")
 
@@ -150,7 +151,7 @@ class Create(Task):
                 self.style = 'basic'
                 if self.verbosity != 0:
                     style = input('Choose a style - basic or soprano (basic): ')
-                    while style not in Create.STYLES:
+                    while style not in Create.STYLES and style != '':
                         print('Unrecognized syle...')
                         self.communicate('Available styles:')
                         for style in Create.STYLES:

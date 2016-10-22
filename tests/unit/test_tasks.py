@@ -123,7 +123,7 @@ def test_create_with_no_defaults():
 
 def test_create_raise_error_if_style_is_not_recognized():
     with pytest.raises(tasks.UnknownStyleError):
-        create_task = tasks.Create(style='blah')  # noqa: ignore=F841
+        tasks.Create(style='blah')
 
 
 def test_create_and_run_no_defaults():
@@ -165,3 +165,12 @@ def test_create_and_run_only_project_name():
     assert os.path.exists(os.path.join(project_path, 'scss', '_settings.scss'))
     assert os.path.exists(os.path.join(project_path, 'scss', '_nav.scss'))
     shutil.rmtree(project_path)
+
+
+def test_generate():
+    example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
+    assert not os.path.exists(os.path.join(example_project_path, 'index.html'))
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'settings.py')
+    tasks.Generate().run()
+    assert os.path.exists(os.path.join(example_project_path, 'index.html'))
+    os.remove(os.path.join(example_project_path, 'index.html'))
