@@ -16,4 +16,4 @@ requests==2.11.1
 six==1.10.0
 traceback2==1.4.0
 unittest2==1.1.0
--e git+git@github.com:xassbit/zorn.git@23c70766883bd73c315a2abd113b2e315dc47357#egg=zorn
+-e .
