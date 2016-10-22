@@ -96,7 +96,7 @@ class AdminTask(Task):
     def update_settings(self, setting, value):
         if self.update is True:
             with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
-                f.write('\n\n{0} = {1}'.format(setting.upper(), value))
+                f.write('\n\n# updated setting:\n{0} = {1}\n'.format(setting.upper(), value))
 
 
 class Create(Task):
