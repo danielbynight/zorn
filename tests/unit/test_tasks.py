@@ -5,7 +5,7 @@ from io import StringIO
 
 import pytest
 
-from zorn import elements, tasks
+from zorn import tasks, errors
 
 
 def test_task():
@@ -100,7 +100,7 @@ def test_update_settings():
 
 def test_raise_error_if_no_zorn_setting_path():
     del os.environ['ZORN_SETTINGS_PATH']
-    with pytest.raises(tasks.NotAZornProjectError):
+    with pytest.raises(errors.NotAZornProjectError):
         tasks.AdminTask.process_settings()
 
 
@@ -109,7 +109,7 @@ def test_raise_error_if_no_root_dir_setting():
         'ZORN_SETTINGS_PATH',
         os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'wrong_settings.py')
     )
-    with pytest.raises(elements.SettingNotFoundError):
+    with pytest.raises(errors.SettingNotFoundError):
         tasks.AdminTask.process_settings()
 
 
@@ -141,7 +141,7 @@ def test_create_with_no_defaults():
 
 
 def test_create_raise_error_if_style_is_not_recognized():
-    with pytest.raises(tasks.UnknownStyleError):
+    with pytest.raises(errors.UnknownStyleError):
         tasks.Create(style='blah')
 
 
@@ -198,7 +198,7 @@ def test_generate():
 def test_generate_with_wrong_settings():
     example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project')
     os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'wrong_settings.py')
-    with pytest.raises(elements.SettingNotFoundError):
+    with pytest.raises(errors.SettingNotFoundError):
         tasks.Generate().run()
 
 
