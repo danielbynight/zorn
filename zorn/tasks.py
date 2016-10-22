@@ -45,7 +45,7 @@ def process_admin_request(arguments=None):
     args = parser.parse_args(arguments)
 
     # import the correct task-class from within this module
-    current_module = sys.modules[__name__]
+    current_module = sys.modules['zorn.tasks']
     task_class = getattr(current_module, ADMIN_TASKS[args.task])
 
     # run the task
