@@ -6,9 +6,9 @@ DEBUG = True
 
 # General
 
-PROJECT_NAME = 'docs'
-SITE_TITLE = 'Zorn'
-AUTHOR = 'Daniel Matias Ferrer'
+PROJECT_NAME = 'example_project'
+SITE_TITLE = 'Example project'
+AUTHOR = 'Mrs. Test'
 
 # Directories
 
