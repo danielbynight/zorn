@@ -8,7 +8,6 @@ import pytest
 from zorn import errors, tasks
 
 
-
 def test_process_creation_request():
     current_dir = os.getcwd()
     tasks.process_creation_request(['--silent', '--name', 'test_create_project'])
