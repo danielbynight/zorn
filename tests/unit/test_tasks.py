@@ -174,3 +174,12 @@ def test_generate():
     tasks.Generate().run()
     assert os.path.exists(os.path.join(example_project_path, 'index.html'))
     os.remove(os.path.join(example_project_path, 'index.html'))
+
+
+def test_import_templates():
+    example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
+    assert not os.path.exists(os.path.join(example_project_path, 'templates'))
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'settings.py')
+    tasks.ImportTemplates().run()
+    assert os.path.exists(os.path.join(example_project_path, 'templates'))
+    shutil.rmtree(os.path.join(example_project_path, 'templates'))
