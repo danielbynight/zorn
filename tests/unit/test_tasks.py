@@ -5,7 +5,26 @@ from io import StringIO
 
 import pytest
 
-from zorn import elements, tasks
+from zorn import errors, tasks
+
+
+def test_process_creation_request():
+    current_dir = os.getcwd()
+    tasks.process_creation_request(['--silent', '--name', 'test_create_project'])
+    new_project_path = os.path.join(current_dir, 'test_create_project')
+    assert os.path.exists(new_project_path)
+    shutil.rmtree(new_project_path)
+
+
+def test_process_admin_request():
+    original_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
+    current_dir = os.getcwd()
+    shutil.copy(os.path.join(original_file_path, 'admin.py'), os.path.join(current_dir, 'admin.py'))
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(original_file_path, 'settings.py')
+    tasks.process_admin_request(['generate'])
+    assert os.path.exists(os.path.join(original_file_path, 'index.html'))
+    os.remove(os.path.join(current_dir, 'admin.py'))
+    os.remove(os.path.join(original_file_path, 'index.html'))
 
 
 def test_task():
@@ -100,7 +119,7 @@ def test_update_settings():
 
 def test_raise_error_if_no_zorn_setting_path():
     del os.environ['ZORN_SETTINGS_PATH']
-    with pytest.raises(tasks.NotAZornProjectError):
+    with pytest.raises(errors.NotAZornProjectError):
         tasks.AdminTask.process_settings()
 
 
@@ -109,7 +128,7 @@ def test_raise_error_if_no_root_dir_setting():
         'ZORN_SETTINGS_PATH',
         os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'wrong_settings.py')
     )
-    with pytest.raises(elements.SettingNotFoundError):
+    with pytest.raises(errors.SettingNotFoundError):
         tasks.AdminTask.process_settings()
 
 
@@ -141,7 +160,7 @@ def test_create_with_no_defaults():
 
 
 def test_create_raise_error_if_style_is_not_recognized():
-    with pytest.raises(tasks.UnknownStyleError):
+    with pytest.raises(errors.UnknownStyleError):
         tasks.Create(style='blah')
 
 
@@ -198,7 +217,7 @@ def test_generate():
 def test_generate_with_wrong_settings():
     example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project')
     os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'wrong_settings.py')
-    with pytest.raises(elements.SettingNotFoundError):
+    with pytest.raises(errors.SettingNotFoundError):
         tasks.Generate().run()
 
 

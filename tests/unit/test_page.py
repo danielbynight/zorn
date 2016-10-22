@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from zorn import elements
+from zorn import elements, errors
 
 
 def test_page():
@@ -21,8 +21,8 @@ def test_page_with_sub_pages():
 
 
 def test_page_raises_error_if_sub_page_is_not_a_sub_page():
-    with pytest.raises(elements.PageError):
-        page = elements.Page('Test', 'test', [elements.Page('Fail', 'fail')])  # noqa: ignore=F841
+    with pytest.raises(errors.PageError):
+        elements.Page('Test', 'test', [elements.Page('Fail', 'fail')])
 
 
 def test_page_generate_content_menu_with_flat_url_style():
@@ -66,7 +66,7 @@ def test_subpage():
 
 def test_subpage_cannot_have_subpages():
     with pytest.raises(TypeError):
-        sub_page = elements.SubPage('Test', 'test', [elements.SubPage('Test', 'test')])  # noqa: ignore=F841
+        elements.SubPage('Test', 'test', [elements.SubPage('Test', 'test')])
 
 
 def test_unlinkedpage():
