@@ -126,12 +126,31 @@ def test_create_raise_error_if_style_is_not_recognized():
         create_task = tasks.Create(style='blah')  # noqa: ignore=F841
 
 
-def test_create_and_run():
+def test_create_and_run_no_defaults():
     create_task = tasks.Create(
         project_name='test_project_name',
         site_title='test_site_title',
         author='Mrs. Test',
         style='basic',
+        verbosity=0,
+    )
+    create_task.run()
+    project_path = os.path.join(os.getcwd(), 'test_project_name')
+    assert os.path.exists(project_path)
+    assert os.path.exists(os.path.join(project_path, 'admin.py'))
+    assert os.path.exists(os.path.join(project_path, 'settings.py'))
+    assert os.path.exists(os.path.join(project_path, 'gulpfile.js'))
+    assert os.path.exists(os.path.join(project_path, 'package.json'))
+    assert os.path.exists(os.path.join(project_path, 'md', 'index.md'))
+    assert os.path.exists(os.path.join(project_path, 'scss', 'main.scss'))
+    assert os.path.exists(os.path.join(project_path, 'scss', '_settings.scss'))
+    assert os.path.exists(os.path.join(project_path, 'scss', '_nav.scss'))
+    shutil.rmtree(project_path)
+
+
+def test_create_and_run_only_project_name():
+    create_task = tasks.Create(
+        project_name='test_project_name',
         verbosity=0,
     )
     create_task.run()
