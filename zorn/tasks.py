@@ -16,13 +16,13 @@ ADMIN_TASKS = {
 }
 
 
-def process_admin_request():
+def process_admin_request(arguments=None):
     parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
     parser.add_argument('task', choices=ADMIN_TASKS.keys())
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-s', '--silent', action='store_true')
     parser.add_argument('-u', '--update', action='store_true')
-    args = parser.parse_args()
+    args = parser.parse_args(arguments)
 
     # import the correct task-class from within this module
     current_module = sys.modules[__name__]

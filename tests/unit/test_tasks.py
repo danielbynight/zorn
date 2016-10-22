@@ -8,6 +8,17 @@ import pytest
 from zorn import tasks, errors
 
 
+def test_process_admin_request():
+    original_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
+    current_dir = os.getcwd()
+    shutil.copy(os.path.join(original_file_path, 'admin.py'), os.path.join(current_dir, 'admin.py'))
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(original_file_path, 'settings.py')
+    tasks.process_admin_request(['generate'])
+    assert os.path.exists(os.path.join(original_file_path, 'index.html'))
+    os.remove(os.path.join(current_dir, 'admin.py'))
+    os.remove(os.path.join(original_file_path, 'index.html'))
+
+
 def test_task():
     task = tasks.Task()
     assert task.verbosity == 1
