@@ -240,13 +240,14 @@ class Create(Task):
         with open(os.path.join(self.script_dir, 'defaults', file_name)) as f:
             raw_settings_content = f.read()
         template = jinja2.Template(raw_settings_content)
-        settings_content = template.render({
+        file_content = template.render({
             'project_name': self.project_name,
             'site_title': self.site_title,
             'author': self.author,
         })
+        file_content += '\n'
         with open(os.path.join(self.root_dir, file_name), 'w') as f:
-            f.write(settings_content)
+            f.write(file_content)
 
     def add_file_with_content(self, path_to, content):
         with open(os.path.join(self.root_dir, path_to), 'w') as f:
