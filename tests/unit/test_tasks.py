@@ -66,15 +66,18 @@ def test_comunicate_verbose():
 
 
 def test_admin_task():
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'settings.py'
+    )
     task = tasks.AdminTask(1, True)
     assert task.verbosity == 1
     assert task.update is True
+    assert task.settings == {'root_dir': 'test', 'other_setting': 'test test'}
 
 
 def test_process_settings():
-    os.environ.setdefault(
-        'ZORN_SETTINGS_PATH',
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'settings.py')
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'settings.py'
     )
     processed_settings = tasks.AdminTask.process_settings()
     assert processed_settings == {'root_dir': 'test', 'other_setting': 'test test'}
@@ -180,7 +183,7 @@ def test_generate():
 def test_generate_with_wrong_settings():
     example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project')
     os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'wrong_settings.py')
-    with pytest.raises(SystemExit):
+    with pytest.raises(elements.SettingNotFoundError):
         tasks.Generate().run()
 
 

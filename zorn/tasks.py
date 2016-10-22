@@ -83,7 +83,6 @@ class AdminTask(Task):
         for setting in settings_module.__dict__.keys():
             if setting.upper() == setting:
                 settings[setting.lower()] = settings_module.__dict__[setting]
-        print(os.environ['ZORN_SETTINGS_PATH'])
         if 'root_dir' not in settings.keys():
             raise zorn.elements.SettingNotFoundError("The root dir setting wasn't found.")
 
@@ -92,6 +91,12 @@ class AdminTask(Task):
     def __init__(self, verbosity=1, update=False):
         super().__init__(verbosity)
         self.update = update
+        self.settings = AdminTask.process_settings()
+
+    def update_settings(self, setting, value):
+        if self.update is True:
+            with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
+                f.write('\n\n{0} = {1}'.format(setting.lower(), value))
 
 
 class Create(Task):
@@ -271,7 +276,7 @@ class Generate(AdminTask):
     def run(self):
         self.communicate(CliColors.RESET + 'Generating... \n')
         try:
-            website = zorn.elements.Website(AdminTask.process_settings())
+            website = zorn.elements.Website(self.settings)
             website.generate_pages()
         except Exception as e:
             sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
@@ -281,14 +286,9 @@ class Generate(AdminTask):
 class ImportTemplates(AdminTask):
     def run(self):
         self.communicate(CliColors.RESET + 'Importing templates...\n')
-        settings = AdminTask.process_settings()
         shutil.copytree(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
-            os.path.join(settings['root_dir'], 'templates')
+            os.path.join(self.settings['root_dir'], 'templates')
         )
-
-        if self.update is True:
-            with open(os.path.join(settings['root_dir'], 'settings.py'), 'a') as f:
-                f.write("\n\nTEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')")
-
+        self.update_settings('TEMPLATES_DIR', "os.path.join(ROOT_DIR, 'templates')")
         self.communicate(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
