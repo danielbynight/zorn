@@ -18,13 +18,28 @@ ADMIN_TASKS = {
 
 def process_creation_request(arguments=None):
     parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
-    parser.add_argument('-n', '--name', nargs='?', default=None)
-    parser.add_argument('-t', '--title', nargs='?', default=None)
-    parser.add_argument('-a', '--author', nargs='?', default=None)
-    parser.add_argument('--style', nargs='?', default=None, choices=Create.STYLES)
-    parser.add_argument('-g', '--generate', action='store_true')
-    parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-s', '--silent', action='store_true')
+    parser.add_argument(
+        '-n', '--name', nargs='?', default=None, help='the name of the project (equal to its root directory)'
+    )
+    parser.add_argument(
+        '-t', '--title', nargs='?', default=None, help='the title of the website'
+    )
+    parser.add_argument(
+        '-a', '--author', nargs='?', default=None, help='the author of the website'
+    )
+    parser.add_argument(
+        '--style', nargs='?', default=None, choices=Create.STYLES, help='the style to be imported'
+    )
+    parser.add_argument(
+        '-g', '--generate', action='store_true',
+        help='if true then generate the website at the end of project creation'
+    )
+    parser.add_argument(
+        '-v', '--verbose', action='store_true', help='make zorn talk more to you'
+    )
+    parser.add_argument(
+        '-s', '--silent', action='store_true', help='(try to) silence zorn'
+    )
     args = parser.parse_args(arguments)
     Create(
         project_name=args.name,
@@ -37,11 +52,16 @@ def process_creation_request(arguments=None):
 
 
 def process_admin_request(arguments=None):
-    parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
+    parser = argparse.ArgumentParser(description='A tool for management of zorn projects.')
     parser.add_argument('task', choices=ADMIN_TASKS.keys())
-    parser.add_argument('-v', '--verbose', action='store_true')
-    parser.add_argument('-s', '--silent', action='store_true')
-    parser.add_argument('-u', '--update', action='store_true')
+    parser.add_argument(
+        '-v', '--verbose', action='store_true', help='make zorn talk more to you'
+    )
+    parser.add_argument('-s', '--silent', action='store_true', help='(try to) silence zorn'
+    )
+    parser.add_argument(
+        '-u', '--update', action='store_true', help='update settings file (if applicable)'
+    )
     args = parser.parse_args(arguments)
 
     # import the correct task-class from within this module
