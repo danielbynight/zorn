@@ -125,6 +125,7 @@ def test_create_raise_error_if_style_is_not_recognized():
     with pytest.raises(tasks.UnknownStyleError):
         create_task = tasks.Create(style='blah')  # noqa: ignore=F841
 
+
 def test_create_and_run():
     create_task = tasks.Create(
         project_name='test_project_name',
