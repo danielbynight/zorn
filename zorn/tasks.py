@@ -7,6 +7,7 @@ import shutil
 import sys
 
 import jinja2
+
 import zorn.elements
 
 ADMIN_TASKS = {
@@ -90,6 +91,12 @@ class AdminTask(Task):
     def __init__(self, verbosity=1, update=False):
         super().__init__(verbosity)
         self.update = update
+        self.settings = AdminTask.process_settings()
+
+    def update_settings(self, setting, value):
+        if self.update is True:
+            with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
+                f.write('\n\n# updated setting:\n{0} = {1}\n'.format(setting.upper(), value))
 
 
 class Create(Task):
@@ -150,7 +157,7 @@ class Create(Task):
                 self.style = 'basic'
                 if self.verbosity != 0:
                     style = input('Choose a style - basic or soprano (basic): ')
-                    while style not in Create.STYLES:
+                    while style not in Create.STYLES and style != '':
                         print('Unrecognized syle...')
                         self.communicate('Available styles:')
                         for style in Create.STYLES:
@@ -239,13 +246,14 @@ class Create(Task):
         with open(os.path.join(self.script_dir, 'defaults', file_name)) as f:
             raw_settings_content = f.read()
         template = jinja2.Template(raw_settings_content)
-        settings_content = template.render({
+        file_content = template.render({
             'project_name': self.project_name,
             'site_title': self.site_title,
             'author': self.author,
         })
+        file_content += '\n'
         with open(os.path.join(self.root_dir, file_name), 'w') as f:
-            f.write(settings_content)
+            f.write(file_content)
 
     def add_file_with_content(self, path_to, content):
         with open(os.path.join(self.root_dir, path_to), 'w') as f:
@@ -268,7 +276,7 @@ class Generate(AdminTask):
     def run(self):
         self.communicate(CliColors.RESET + 'Generating... \n')
         try:
-            website = zorn.elements.Website(AdminTask.process_settings())
+            website = zorn.elements.Website(self.settings)
             website.generate_pages()
         except Exception as e:
             sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
@@ -278,14 +286,9 @@ class Generate(AdminTask):
 class ImportTemplates(AdminTask):
     def run(self):
         self.communicate(CliColors.RESET + 'Importing templates...\n')
-        settings = AdminTask.process_settings()
         shutil.copytree(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
-            os.path.join(settings['root_dir'], 'templates')
+            os.path.join(self.settings['root_dir'], 'templates')
         )
-
-        if self.update is True:
-            with open(os.path.join(settings['root_dir'], 'settings.py'), 'a') as f:
-                f.write("\n\nTEMPLATES_DIR = os.path.join(ROOT_DIR, 'templates')")
-
+        self.update_settings('templates_dir', "os.path.join(ROOT_DIR, 'templates')")
         self.communicate(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')

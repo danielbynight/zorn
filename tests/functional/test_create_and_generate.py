@@ -3,8 +3,8 @@ import shutil
 
 
 def test_create_and_generate_default():
-    os.system('zorn -sn test_project')
-    project_path = os.path.join(os.getcwd(), 'test_project')
+    os.system('python zorn/bin/zorn -sn test_project')
+    project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'test_project')
     assert os.path.exists(os.path.join(project_path, 'admin.py'))
     assert os.path.exists(os.path.join(project_path, 'settings.py'))
     assert os.path.exists(os.path.join(project_path, 'gulpfile.js'))
