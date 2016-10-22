@@ -8,6 +8,15 @@ import pytest
 from zorn import errors, tasks
 
 
+
+def test_process_creation_request():
+    current_dir = os.getcwd()
+    tasks.process_creation_request(['--silent', '--name', 'test_create_project'])
+    new_project_path = os.path.join(current_dir, 'test_create_project')
+    assert os.path.exists(new_project_path)
+    shutil.rmtree(new_project_path)
+
+
 def test_process_admin_request():
     original_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
     current_dir = os.getcwd()

@@ -16,6 +16,26 @@ ADMIN_TASKS = {
 }
 
 
+def process_creation_request(arguments=None):
+    parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
+    parser.add_argument('-n', '--name', nargs='?', default=None)
+    parser.add_argument('-t', '--title', nargs='?', default=None)
+    parser.add_argument('-a', '--author', nargs='?', default=None)
+    parser.add_argument('--style', nargs='?', default=None, choices=Create.STYLES)
+    parser.add_argument('-g', '--generate', action='store_true')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-s', '--silent', action='store_true')
+    args = parser.parse_args(arguments)
+    Create(
+        project_name=args.name,
+        site_title=args.title,
+        author=args.author,
+        style=args.style,
+        generate=args.generate,
+        verbosity=Task.parse_verbosity(args.verbose, args.silent)
+    ).run()
+
+
 def process_admin_request(arguments=None):
     parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
     parser.add_argument('task', choices=ADMIN_TASKS.keys())
