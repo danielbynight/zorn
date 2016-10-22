@@ -176,6 +176,13 @@ def test_generate():
     os.remove(os.path.join(example_project_path, 'index.html'))
 
 
+def test_generate_with_wrong_settings():
+    example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project')
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'wrong_settings.py')
+    with pytest.raises(SystemExit):
+        tasks.Generate().run()
+
+
 def test_import_templates():
     example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
     assert not os.path.exists(os.path.join(example_project_path, 'templates'))
