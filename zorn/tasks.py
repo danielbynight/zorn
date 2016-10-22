@@ -58,7 +58,7 @@ def process_admin_request(arguments=None):
         '-v', '--verbose', action='store_true', help='make zorn talk more to you'
     )
     parser.add_argument('-s', '--silent', action='store_true', help='(try to) silence zorn'
-    )
+                        )
     parser.add_argument(
         '-u', '--update', action='store_true', help='update settings file (if applicable)'
     )
