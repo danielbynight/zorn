@@ -79,9 +79,23 @@ def test_process_settings():
     os.environ['ZORN_SETTINGS_PATH'] = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'settings.py'
     )
-    processed_settings = tasks.AdminTask.process_settings()
-    assert processed_settings == {'root_dir': 'test', 'other_setting': 'test test'}
+    assert tasks.AdminTask.process_settings() == {'root_dir': 'test', 'other_setting': 'test test'}
 
+
+def test_update_settings():
+    settings_file_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project', 'settings.py'
+    )
+    os.environ['ZORN_SETTINGS_PATH'] = settings_file_path
+    with open(settings_file_path, 'r') as f:
+        original_settings = f.read()
+    task = tasks.AdminTask(1, update=True)
+    task.update_settings('test_setting', "'a test value'")
+    with open(settings_file_path, 'r') as f:
+        modified_settings = f.read()
+    with open(settings_file_path, 'w+') as f:
+        f.write(original_settings)
+    assert "TEST_SETTING = 'a test value'" in modified_settings
 
 def test_raise_error_if_no_zorn_setting_path():
     del os.environ['ZORN_SETTINGS_PATH']

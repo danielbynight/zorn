@@ -96,7 +96,7 @@ class AdminTask(Task):
     def update_settings(self, setting, value):
         if self.update is True:
             with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
-                f.write('\n\n{0} = {1}'.format(setting.lower(), value))
+                f.write('\n\n{0} = {1}'.format(setting.upper(), value))
 
 
 class Create(Task):
@@ -290,5 +290,5 @@ class ImportTemplates(AdminTask):
             os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
             os.path.join(self.settings['root_dir'], 'templates')
         )
-        self.update_settings('TEMPLATES_DIR', "os.path.join(ROOT_DIR, 'templates')")
+        self.update_settings('templates_dir', "os.path.join(ROOT_DIR, 'templates')")
         self.communicate(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
