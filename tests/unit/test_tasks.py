@@ -5,7 +5,7 @@ from io import StringIO
 
 import pytest
 
-from zorn import tasks, errors
+from zorn import errors, tasks
 
 
 def test_process_admin_request():
