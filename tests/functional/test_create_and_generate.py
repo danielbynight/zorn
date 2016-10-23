@@ -17,6 +17,7 @@ def test_create_and_generate_default():
     assert os.path.exists(os.path.join(project_path, 'index.html'))
     shutil.rmtree(project_path)
 
+
 def test_create_and_generate_module():
     os.system('python -m zorn -sn test_project')
     project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'test_project')
