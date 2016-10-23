@@ -59,7 +59,7 @@ def test_page_render_html():
     test_content = page.render_html(
         {'test_content': 'This is a test.'}, templates_dir, markdown_dir, None, 'flat', False
     )
-    assert test_content == 'This is a test.'
+    assert page.html == 'This is a test.'
 
 
 def test_set_content_from_md():

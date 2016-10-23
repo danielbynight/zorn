@@ -21,6 +21,7 @@ class Page:
         self.sub_pages = sub_pages
         self.body_content = None
         self.css_path = None
+        self.html = None
 
     def generate_content_menu(self, url_style):
         content = '#' + self.title + '\n'
@@ -59,14 +60,20 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    def render_html(self, context, templates_dir, markdown_dir, markdown_extensions=None, url_style='flat', debug=True):
+    def render_html(self, context, templates_dir, markdown_dir, markdown_extensions=None, url_style='flat',
+                    debug=True):
         self.set_content_from_md(markdown_dir, markdown_extensions, url_style)
         self.set_css_path(debug, url_style)
 
         env = jinja2.Environment()
         env.loader = jinja2.FileSystemLoader(templates_dir)
         template = env.get_template(os.path.join('structure.html'))
-        return template.render(context)
+        self.html = template.render(context)
+
+    def save_html(self, site_dir, url_style='flat'):
+        page_path = os.path.join(site_dir, '{0}.html'.format(self.file_name))
+        with open(page_path, 'w+') as f:
+            f.write(self.html)
 
 
 class SubPage(Page):
@@ -74,6 +81,10 @@ class SubPage(Page):
 
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
+        self.parent_page = None
+
+    def set_parent_page(self, parent_page):
+        self.parent_page = parent_page
 
     def set_css_path(self, debug=False, url_style='flat'):
         if debug is False:
@@ -83,6 +94,19 @@ class SubPage(Page):
                 self.css_path = '../main.css'
             else:
                 self.css_path = './main.css'
+
+    def save_html(self, site_dir, url_style='flat'):
+        if url_style == 'flat':
+            page_path = os.path.join(site_dir, '{0}.html'.format(self.file_name))
+            with open(page_path, 'w+') as f:
+                f.write(self.html)
+        else:
+            page_dir_path = os.path.join(site_dir, self.parent_page.file_name)
+            if not os.path.exists(page_dir_path):
+                os.mkdir(page_dir_path)
+            page_path = os.path.join(page_dir_path, '{0}.html'.format(self.file_name))
+            with open(page_path, 'w+') as f:
+                f.write(self.html)
 
 
 class UnlinkedPage(Page):
@@ -99,6 +123,16 @@ class UnlinkedPage(Page):
             self.css_path = '/main.min.css'
         else:
             self.css_path = ''.join(['../' for _ in range(len(self.path))]) + 'main.css'
+
+    def save_html(self, site_dir, url_style='flat'):
+        final_dir = site_dir
+        for partial in self.path:
+            if not os.path.exists(os.path.join(final_dir, partial)):
+                os.mkdir(os.path.join(final_dir, partial))
+            final_dir = os.path.join(final_dir, partial)
+        page_path = os.path.join(final_dir, '{0}.html'.format(self.file_name))
+        with open(page_path, 'w+') as f:
+            f.write(self.html)
 
 
 class Website:
@@ -162,6 +196,7 @@ class Website:
             parent_page = ''
             if type(page) is SubPage:
                 parent_page = [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
+                page.set_parent_page(parent_page)
 
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
 
@@ -178,7 +213,7 @@ class Website:
 
             pages = [page for page in self.pages if type(page) is Page]
 
-            html = page.render_html({
+            page.render_html({
                 'debug': self.debug,
                 'site_description': self.description,
                 'site_author': self.author,
@@ -196,23 +231,4 @@ class Website:
                 'css_path': page.css_path,
             }, self.templates_dir, self.markdown_dir, self.markdown_extensions, self.url_style, self.debug)
 
-            if type(page) is UnlinkedPage:
-                final_dir = self.site_dir
-                for partial in page.path:
-                    if not os.path.exists(os.path.join(final_dir, partial)):
-                        os.mkdir(os.path.join(final_dir, partial))
-                    final_dir = os.path.join(final_dir, partial)
-                page_path = os.path.join(final_dir, '{0}.html'.format(page.file_name))
-                with open(page_path, 'w+') as f:
-                    f.write(html)
-            elif self.url_style == 'flat' or type(page) is Page:
-                page_path = os.path.join(self.site_dir, '{0}.html'.format(page.file_name))
-                with open(page_path, 'w+') as f:
-                    f.write(html)
-            elif type(page) is SubPage:
-                page_dir_path = os.path.join(self.site_dir, parent_page.file_name)
-                if not os.path.exists(page_dir_path):
-                    os.mkdir(page_dir_path)
-                page_path = os.path.join(page_dir_path, '{0}.html'.format(page.file_name))
-                with open(page_path, 'w+') as f:
-                    f.write(html)
+            page.save_html(self.site_dir, url_style=self.url_style)
