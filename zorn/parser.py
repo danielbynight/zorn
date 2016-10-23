@@ -106,5 +106,11 @@ class AdminParser(Parser):
     def parse_arguments(self):
         super().parse_arguments()
         tasks_module = sys.modules['zorn.tasks']
-        self.task = getattr(tasks_module, AdminParser.TASKS[self._parsed_args.task])
+        input_task = self._parsed_args.task
+        if ':' in input_task:
+            input_task = input_task.split(':')
+            self.task = getattr(tasks_module, AdminParser.TASKS[input_task[0]])
+            self.set_task_argument('task_args', input_task[1:])
+        else:
+            self.task = getattr(tasks_module, AdminParser.TASKS[input_task])
         self.set_task_argument('update', self._parsed_args.update)

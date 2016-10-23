@@ -53,6 +53,7 @@ class AdminTask(Task):
         super().__init__(**kwargs)
         self.update = kwargs['update'] if 'update' in kwargs.keys() else False
         self.settings = AdminTask.process_settings()
+        self.task_args = kwargs['task_args'] if 'task_args' in kwargs.keys() else None
 
     def update_settings(self, setting, value):
         if self.update is True:
