@@ -20,3 +20,9 @@ def test_process_admin_request():
     assert os.path.exists(os.path.join(original_file_path, 'index.html'))
     os.remove(os.path.join(current_dir, 'admin.py'))
     os.remove(os.path.join(original_file_path, 'index.html'))
+
+def test_parser_set_task_to_verbose():
+    parser_ = parser.Parser(['--verbose'])
+    parser_.add_arguments()
+    parser_.parse_arguments()
+    assert parser_.task_arguments['verbosity'] == 2
