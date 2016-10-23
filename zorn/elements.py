@@ -77,9 +77,8 @@ class SubPage(Page):
         if debug is False:
             self.css_path = '/main.min.css'
         else:
-            css_file = './main.css'
             if url_style == 'nested':
-                self.css_path = '../' + css_file
+                self.css_path = '../main.css'
             else:
                 self.css_path = './main.css'
 
