@@ -193,10 +193,10 @@ class Website:
         for page in self.pages:
 
             # get parent page in case of sub page
-            parent_page = ''
             if type(page) is SubPage:
-                parent_page = [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
-                page.set_parent_page(parent_page)
+                page.set_parent_page(
+                    [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
+                )
 
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
 
@@ -204,14 +204,10 @@ class Website:
             active_nav_links = [page.title]
             if type(page) is SubPage:
                 # if the page in question is a subpage then activate parent too
-                active_nav_links.append(parent_page.title)
+                active_nav_links.append(page.parent_page.title)
 
             # generate css path
             page.set_css_path(self.debug, self.url_style)
-
-            back_path = ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../'
-
-            pages = [page for page in self.pages if type(page) is Page]
 
             page.render_html({
                 'debug': self.debug,
@@ -221,11 +217,11 @@ class Website:
                 'site_title': self.title,
                 'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
-                'back_path': back_path,
+                'back_path': ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../',
                 'page_type': type(page).__name__,
                 'body_content': page.body_content,
                 'current_year': datetime.datetime.now().year,
-                'pages': pages,
+                'pages': [page for page in self.pages if type(page) is Page],
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
                 'css_path': page.css_path,
