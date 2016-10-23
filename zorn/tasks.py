@@ -25,6 +25,9 @@ class Task:
         if self.verbosity == 2 or (self.verbosity == 1 and standard_verbosity is True):
             print(message)
 
+    def run(self):
+        self.communicate('\n' + CliColors.HEADER + 'Welcome to zorn!' + CliColors.RESET)
+
 
 class AdminTask(Task):
     @staticmethod
@@ -78,6 +81,7 @@ class Create(Task):
         self.root_dir = None
 
     def run(self):
+        super().run()
         try:
             if self.project_name is None:
                 project_name = input('Give your project a name: ')
@@ -224,17 +228,16 @@ class Create(Task):
 
 class Generate(AdminTask):
     def run(self):
+        super().run()
         self.communicate(CliColors.RESET + 'Generating... \n')
-        try:
-            website = elements.Website(self.settings)
-            website.generate_pages()
-        except Exception as e:
-            sys.exit(CliColors.ERROR + str(e) + CliColors.RESET)
+        website = elements.Website(self.settings)
+        website.generate_pages()
         self.communicate(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
 
 
 class ImportTemplates(AdminTask):
     def run(self):
+        super().run()
         self.communicate(CliColors.RESET + 'Importing templates...\n')
         shutil.copytree(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'),
