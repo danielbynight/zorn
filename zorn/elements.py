@@ -35,7 +35,7 @@ class Page:
         return self.title
 
     def set_content_from_md(self, markdown_dir, markdown_extensions=None, url_style='flat'):
-        markdown_extensions = [] if markdown_extensions == None else markdown_extensions
+        markdown_extensions = [] if markdown_extensions is None else markdown_extensions
         if os.path.isfile(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))):
             with open(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
@@ -59,8 +59,10 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    @staticmethod
-    def render_html(context, templates_dir):
+    def render_html(self, context, templates_dir, markdown_dir, markdown_extensions=None, url_style='flat', debug=True):
+        self.set_content_from_md(markdown_dir, markdown_extensions, url_style)
+        self.set_css_path(debug, url_style)
+
         env = jinja2.Environment()
         env.loader = jinja2.FileSystemLoader(templates_dir)
         template = env.get_template(os.path.join('structure.html'))
@@ -162,7 +164,6 @@ class Website:
                 parent_page = [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
 
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
-            body_content = page.body_content
 
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.title]
@@ -172,13 +173,12 @@ class Website:
 
             # generate css path
             page.set_css_path(self.debug, self.url_style)
-            css_path = page.css_path
 
             back_path = ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../'
 
             pages = [page for page in self.pages if type(page) is Page]
 
-            html = self.pages[0].render_html({
+            html = page.render_html({
                 'debug': self.debug,
                 'site_description': self.description,
                 'site_author': self.author,
@@ -188,13 +188,13 @@ class Website:
                 'page_title': page.title,
                 'back_path': back_path,
                 'page_type': type(page).__name__,
-                'body_content': body_content,
+                'body_content': page.body_content,
                 'current_year': datetime.datetime.now().year,
                 'pages': pages,
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
-                'css_path': css_path,
-            }, self.templates_dir)
+                'css_path': page.css_path,
+            }, self.templates_dir, self.markdown_dir, self.markdown_extensions, self.url_style, self.debug)
 
             if type(page) is UnlinkedPage:
                 final_dir = self.site_dir

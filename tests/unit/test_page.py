@@ -54,7 +54,11 @@ def test_page_casting_to_string():
 
 def test_page_render_html():
     templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
-    test_content = elements.Page.render_html({'test_content': 'This is a test.'}, templates_dir)
+    markdown_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project', 'md')
+    page = elements.Page('index', 'index')
+    test_content = page.render_html(
+        {'test_content': 'This is a test.'}, templates_dir, markdown_dir, None, 'flat', False
+    )
     assert test_content == 'This is a test.'
 
 
