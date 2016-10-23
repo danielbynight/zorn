@@ -1,6 +1,6 @@
 import os
 
-from zorn.tasks import process_admin_request
+from zorn.parser import process_admin_request
 
 if __name__ == '__main__':
     os.environ.setdefault(

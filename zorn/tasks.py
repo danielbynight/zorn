@@ -1,4 +1,3 @@
-import argparse
 import getpass
 import importlib.util
 import json
@@ -10,71 +9,6 @@ import jinja2
 
 from zorn import elements, errors
 
-ADMIN_TASKS = {
-    'generate': 'Generate',
-    'importtemplates': 'ImportTemplates'
-}
-
-
-def process_creation_request(arguments=None):
-    parser = argparse.ArgumentParser(description='A tool for creation of zorn projects.')
-    parser.add_argument(
-        '-n', '--name', nargs='?', default=None, help='the name of the project (equal to its root directory)'
-    )
-    parser.add_argument(
-        '-t', '--title', nargs='?', default=None, help='the title of the website'
-    )
-    parser.add_argument(
-        '-a', '--author', nargs='?', default=None, help='the author of the website'
-    )
-    parser.add_argument(
-        '--style', nargs='?', default=None, choices=Create.STYLES, help='the style to be imported'
-    )
-    parser.add_argument(
-        '-g', '--generate', action='store_true',
-        help='if true then generate the website at the end of project creation'
-    )
-    parser.add_argument(
-        '-v', '--verbose', action='store_true', help='make zorn talk more to you'
-    )
-    parser.add_argument(
-        '-s', '--silent', action='store_true', help='(try to) silence zorn'
-    )
-    args = parser.parse_args(arguments)
-    Create(
-        project_name=args.name,
-        site_title=args.title,
-        author=args.author,
-        style=args.style,
-        generate=args.generate,
-        verbosity=Task.parse_verbosity(args.verbose, args.silent)
-    ).run()
-
-
-def process_admin_request(arguments=None):
-    parser = argparse.ArgumentParser(description='A tool for management of zorn projects.')
-    parser.add_argument('task', choices=ADMIN_TASKS.keys())
-    parser.add_argument(
-        '-v', '--verbose', action='store_true', help='make zorn talk more to you'
-    )
-    parser.add_argument('-s', '--silent', action='store_true', help='(try to) silence zorn'
-                        )
-    parser.add_argument(
-        '-u', '--update', action='store_true', help='update settings file (if applicable)'
-    )
-    args = parser.parse_args(arguments)
-
-    # import the correct task-class from within this module
-    current_module = sys.modules['zorn.tasks']
-    task_class = getattr(current_module, ADMIN_TASKS[args.task])
-
-    # run the task
-    task = task_class(
-        verbosity=Task.parse_verbosity(args.verbose, args.silent),
-        update=args.update
-    )
-    task.run()
-
 
 class CliColors:
     HEADER = '\033[32m'
@@ -84,16 +18,8 @@ class CliColors:
 
 
 class Task:
-    @staticmethod
-    def parse_verbosity(verbose=False, silent=False):
-        if silent is True:
-            return 0
-        elif verbose is True:
-            return 2
-        return 1
-
-    def __init__(self, verbosity=1):
-        self.verbosity = verbosity
+    def __init__(self, **kwargs):
+        self.verbosity = kwargs['verbosity'] if 'verbosity' in kwargs.keys() else 1
 
     def communicate(self, message, standard_verbosity=True):
         if self.verbosity == 2 or (self.verbosity == 1 and standard_verbosity is True):
@@ -120,9 +46,9 @@ class AdminTask(Task):
 
         return settings
 
-    def __init__(self, verbosity=1, update=False):
-        super().__init__(verbosity)
-        self.update = update
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.update = kwargs['update'] if 'update' in kwargs.keys() else False
         self.settings = AdminTask.process_settings()
 
     def update_settings(self, setting, value):
@@ -134,25 +60,17 @@ class AdminTask(Task):
 class Create(Task):
     STYLES = ['basic', 'soprano']
 
-    def __init__(
-            self,
-            project_name=None,
-            site_title=None,
-            author=None,
-            style=None,
-            generate=False,
-            verbosity=1
-    ):
-        super().__init__(verbosity)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         # Settings
-        self.project_name = project_name
-        self.site_title = site_title
-        self.author = author
-        self.style = style
+        self.project_name = kwargs['project_name'] if 'project_name' in kwargs.keys() else None
+        self.site_title = kwargs['site_title'] if 'site_title' in kwargs.keys() else None
+        self.author = kwargs['author'] if 'author' in kwargs.keys() else None
+        self.style = kwargs['style'] if 'style' in kwargs.keys() else None
         if self.style not in Create.STYLES and self.style is not None:
-            raise errors.UnknownStyleError('The style {0} is not recognized.'.format(style))
-        self.generate = generate
+            raise errors.UnknownStyleError('The style {0} is not recognized.'.format(kwargs['style']))
+        self.generate = kwargs['generate'] if 'generate' in kwargs.keys() else False
 
         # Directories
         self.cwd = os.getcwd()
