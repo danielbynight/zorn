@@ -142,8 +142,6 @@ class Website:
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
             body_content = page.body_content
 
-            footer_content = '&copy; {0} {1}'.format(datetime.datetime.now().year, self.author)
-
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.title]
             if type(page) is SubPage:
@@ -174,7 +172,7 @@ class Website:
                 'back_path': back_path,
                 'page_type': type(page).__name__,
                 'body_content': body_content,
-                'footer_content': footer_content,
+                'current_year': datetime.datetime.now().year,
                 'pages': pages,
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
