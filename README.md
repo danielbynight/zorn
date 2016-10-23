@@ -21,7 +21,7 @@ Gulp also regenerates the website once new content was added or once settings we
 - Once installed, navigate to the directory where you want to locate your project and run `zorn`.
 You will be led through the creation of a new project.
 
-## Page blocks
+# Page blocks
 
 A canonical zorn page has four blocks: *header*, *navigation*, *body* and *footer*.  
 The *header* and *footer* blocks is the same for all pages and include the site title, subtitle and author.  
@@ -55,19 +55,19 @@ A canonical zorn project has the following structure:
         
 where `my_project` is the name of your project.
 
-## Nesting
+# Nesting
 
 Zorn allows for pages to be nested as subpages. Subpages show as dropdown under their parent on the navigation menu.
 Also if the setting `URL_STYLE` is set to `'nested'`, they are generated into a folder with the name of their parent.
 
-## Markdown content
+# Markdown content
 
 The `md` folder is where you can drop markdown files with the content of the website's pages.
 These files should be named with the name of the page they relate to.
 For example, the content for `index.html` should be in the `index.md` file.
 Not all pages need an associated `.md` file and `.md` files for which there is no associated page are ignored when generating the website.
 
-## Style
+# Style
 
 When creating a zorn project by running `zorn` you can choose a default style. This will be imported to your project's directory. The default style is "basic". 
 The stylesheets for the website are generated from [Sass](http://sass-lang.com) files with Gulp. The file `main.scss` just imports the other `.scss` files.
@@ -82,9 +82,10 @@ You can also make changes to your project by interacting with zorn through `admi
 
 - `generate` - generates the website;
 - `importtemplates` - imports the templates locally (to your project's directory). Pass the flag `-u` or `-update` to update the settings file;
-- `help` - lists all available commands.
+- `importstyle:a_style` where `a_style` is one of the available styles - imports a style to the root directory of your project, i.e., creates a directory with the name of the style and the original Sass files of that style.
+- `--help` - lists all available commands.
   
-In order to create a new project you can run `zorn` or `zorn create`.
+In order to create a new project you can run `zorn`.
 If you already know what to call the project you can pass it as an argument, e.g. `zorn create my_project`.
 If you are bothered by the verbosity of zorn you can pass in the flag `-s` or `--silent`.
 

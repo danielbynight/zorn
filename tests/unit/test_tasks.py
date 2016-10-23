@@ -8,57 +8,21 @@ import pytest
 from zorn import errors, tasks
 
 
-def test_process_creation_request():
-    current_dir = os.getcwd()
-    tasks.process_creation_request(['--silent', '--name', 'test_create_project'])
-    new_project_path = os.path.join(current_dir, 'test_create_project')
-    assert os.path.exists(new_project_path)
-    shutil.rmtree(new_project_path)
-
-
-def test_process_admin_request():
-    original_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
-    current_dir = os.getcwd()
-    shutil.copy(os.path.join(original_file_path, 'admin.py'), os.path.join(current_dir, 'admin.py'))
-    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(original_file_path, 'settings.py')
-    tasks.process_admin_request(['generate'])
-    assert os.path.exists(os.path.join(original_file_path, 'index.html'))
-    os.remove(os.path.join(current_dir, 'admin.py'))
-    os.remove(os.path.join(original_file_path, 'index.html'))
-
-
 def test_task():
     task = tasks.Task()
     assert task.verbosity == 1
 
 
-def test_parse_verbosity_standard():
-    silent = False
-    verbose = False
-    verbosity = tasks.Task.parse_verbosity(verbose, silent)
-    assert verbosity == 1
-
-
-def test_parse_verbosity_silent():
-    silent = True
-    verbose = False
-    verbosity = tasks.Task.parse_verbosity(verbose, silent)
-    assert verbosity == 0
-    silent = True
-    verbose = True
-    verbosity = tasks.Task.parse_verbosity(verbose, silent)
-    assert verbosity == 0
-
-
-def test_parse_verbosity_verbose():
-    silent = False
-    verbose = True
-    verbosity = tasks.Task.parse_verbosity(verbose, silent)
-    assert verbosity == 2
+def test_task_run():
+    task = tasks.Task()
+    with StringIO() as stream:
+        sys.stdout = stream
+        task.run()
+        assert 'Welcome to zorn!' in stream.getvalue()
 
 
 def test_comunicate_standard_verbosity():
-    task = tasks.Task(1)
+    task = tasks.Task(verbosity=1)
     with StringIO() as stream:
         sys.stdout = stream
         task.communicate('standard')
@@ -67,7 +31,7 @@ def test_comunicate_standard_verbosity():
 
 
 def test_comunicate_silent():
-    task = tasks.Task(0)
+    task = tasks.Task(verbosity=0)
     with StringIO() as stream:
         sys.stdout = stream
         task.communicate('standard')
@@ -76,7 +40,7 @@ def test_comunicate_silent():
 
 
 def test_comunicate_verbose():
-    task = tasks.Task(2)
+    task = tasks.Task(verbosity=2)
     with StringIO() as stream:
         sys.stdout = stream
         task.communicate('standard')
@@ -88,7 +52,7 @@ def test_admin_task():
     os.environ['ZORN_SETTINGS_PATH'] = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'settings.py'
     )
-    task = tasks.AdminTask(1, True)
+    task = tasks.AdminTask(verbosity=1, update=True)
     assert task.verbosity == 1
     assert task.update is True
     assert task.settings == {'root_dir': 'test', 'other_setting': 'test test'}
@@ -108,7 +72,7 @@ def test_update_settings():
     os.environ['ZORN_SETTINGS_PATH'] = settings_file_path
     with open(settings_file_path, 'r') as f:
         original_settings = f.read()
-    task = tasks.AdminTask(1, update=True)
+    task = tasks.AdminTask(verbosity=1, update=True)
     task.update_settings('test_setting', "'a test value'")
     with open(settings_file_path, 'r') as f:
         modified_settings = f.read()
@@ -228,3 +192,19 @@ def test_import_templates():
     tasks.ImportTemplates().run()
     assert os.path.exists(os.path.join(example_project_path, 'templates'))
     shutil.rmtree(os.path.join(example_project_path, 'templates'))
+
+
+def test_import_style():
+    example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
+    assert not os.path.exists(os.path.join(example_project_path, 'soprano'))
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'settings.py')
+    import_task = tasks.ImportStyle(task_args=['soprano'])
+    assert import_task.style == 'soprano'
+    import_task.run()
+    assert os.path.exists(os.path.join(example_project_path, 'soprano'))
+    shutil.rmtree(os.path.join(example_project_path, 'soprano'))
+
+
+def test_import_wrong_style():
+    with pytest.raises(errors.UnknownStyleError):
+        tasks.ImportStyle(task_args=['basics'])
