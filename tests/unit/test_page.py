@@ -58,6 +58,13 @@ def test_page_render_html():
     assert test_content == 'This is a test.'
 
 
+def test_set_content_from_md():
+    page = elements.Page('Test', 'test_page')
+    page.set_content_from_md(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'md'))
+    assert '<h1>This is a test</h1>' in page.body_content
+    assert '<p>There is nothing to see here</p>' in page.body_content
+
+
 def test_subpage():
     sub_page = elements.SubPage('Test', 'test')
     assert sub_page.title == 'Test'

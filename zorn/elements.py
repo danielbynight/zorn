@@ -34,6 +34,7 @@ class Page:
         return self.title
 
     def set_content_from_md(self, markdown_dir, markdown_extensions=None, url_style='flat'):
+        markdown_extensions = [] if markdown_extensions == None else markdown_extensions
         if os.path.isfile(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))):
             with open(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
@@ -150,6 +151,7 @@ class Website:
                 active_nav_links.append(parent_page.title)
 
             # generate css path
+
             css_file = 'main.css' if self.debug is True else 'main.min.css'
             css_path = './' + css_file
             if type(page) is SubPage and self.url_style == 'nested':
