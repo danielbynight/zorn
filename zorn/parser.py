@@ -99,7 +99,7 @@ class AdminParser(Parser):
 
     def add_arguments(self):
         super().add_arguments()
-        self._parser.add_argument('task')
+        self._parser.add_argument('task', help='the admin task you wish to perform')
         self._parser.add_argument(
             '-u', '--update', action='store_true', help='update settings after task is run (if applicable)'
         )
