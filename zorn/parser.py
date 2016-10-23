@@ -88,7 +88,8 @@ class CreationParser(Parser):
 class AdminParser(Parser):
     TASKS = {
         'generate': 'Generate',
-        'importtemplates': 'ImportTemplates'
+        'importtemplates': 'ImportTemplates',
+        'importstyle': 'ImportStyle',
     }
 
     def __init__(self, args=None):
@@ -98,7 +99,7 @@ class AdminParser(Parser):
 
     def add_arguments(self):
         super().add_arguments()
-        self._parser.add_argument('task', choices=AdminParser.TASKS.keys())
+        self._parser.add_argument('task')
         self._parser.add_argument(
             '-u', '--update', action='store_true', help='update settings after task is run (if applicable)'
         )
@@ -107,7 +108,7 @@ class AdminParser(Parser):
         super().parse_arguments()
         tasks_module = sys.modules['zorn.tasks']
         input_task = self._parsed_args.task
-        if ':' in input_task:
+        if ':' in str(input_task):
             input_task = input_task.split(':')
             self.task = getattr(tasks_module, AdminParser.TASKS[input_task[0]])
             self.set_task_argument('task_args', input_task[1:])

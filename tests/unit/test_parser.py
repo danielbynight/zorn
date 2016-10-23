@@ -27,3 +27,10 @@ def test_parser_set_task_to_verbose():
     parser_.add_arguments()
     parser_.parse_arguments()
     assert parser_.task_arguments['verbosity'] == 2
+
+
+def test_send_task_args():
+    parser_ = parser.AdminParser(['importstyle:basic'])
+    parser_.add_arguments()
+    parser_.parse_arguments()
+    assert parser_.task_arguments['task_args'] == ['basic']

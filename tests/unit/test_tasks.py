@@ -192,3 +192,19 @@ def test_import_templates():
     tasks.ImportTemplates().run()
     assert os.path.exists(os.path.join(example_project_path, 'templates'))
     shutil.rmtree(os.path.join(example_project_path, 'templates'))
+
+
+def test_import_style():
+    example_project_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project')
+    assert not os.path.exists(os.path.join(example_project_path, 'soprano'))
+    os.environ['ZORN_SETTINGS_PATH'] = os.path.join(example_project_path, 'settings.py')
+    import_task = tasks.ImportStyle(task_args=['soprano'])
+    assert import_task.style == 'soprano'
+    import_task.run()
+    assert os.path.exists(os.path.join(example_project_path, 'soprano'))
+    shutil.rmtree(os.path.join(example_project_path, 'soprano'))
+
+
+def test_import_wrong_style():
+    with pytest.raises(errors.UnknownStyleError):
+        tasks.ImportStyle(task_args=['basics'])

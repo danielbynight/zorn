@@ -246,3 +246,23 @@ class ImportTemplates(AdminTask):
         )
         self.update_settings('templates_dir', "os.path.join(ROOT_DIR, 'templates')")
         self.communicate(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
+
+
+class ImportStyle(AdminTask):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        input_style = self.task_args[0]
+        if input_style not in Create.STYLES:
+            raise errors.UnknownStyleError(
+                'The style {0} was not recognized. Available styles: {1}'.format(input_style, Create.STYLES)
+            )
+        self.style = input_style
+
+    def run(self):
+        super().run()
+        self.communicate(CliColors.RESET + 'Importing style "{0}"...\n'.format(self.style))
+        shutil.copytree(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), 'styles', self.style),
+            os.path.join(self.settings['root_dir'], self.style)
+        )
+        self.communicate(CliColors.SUCESS + 'Done!' + CliColors.RESET + '\n')
