@@ -54,8 +54,19 @@ def test_page_casting_to_string():
 
 def test_page_render_html():
     templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
-    test_content = elements.Page.render_html({'test_content': 'This is a test.'}, templates_dir)
-    assert test_content == 'This is a test.'
+    markdown_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project', 'md')
+    page = elements.Page('index', 'index')
+    page.render_html(
+        {'test_content': 'This is a test.'}, templates_dir, markdown_dir, None, 'flat', False
+    )
+    assert page.html == 'This is a test.'
+
+
+def test_set_content_from_md():
+    page = elements.Page('Test', 'test_page')
+    page.set_content_from_md(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'md'))
+    assert '<h1>This is a test</h1>' in page.body_content
+    assert '<p>There is nothing to see here</p>' in page.body_content
 
 
 def test_subpage():
@@ -88,3 +99,36 @@ def test_unlinkedpage_without_path():
     assert unlinked_page.title == 'Test'
     assert unlinked_page.file_name == 'test'
     assert unlinked_page.path == []
+
+
+def test_set_css_path_of_page():
+    page = elements.Page('test', 'Test')
+    page.set_css_path(True)
+    assert page.css_path == './main.css'
+
+
+def test_set_css_path_of_subpage():
+    page = elements.SubPage('test', 'Test')
+    page.set_css_path(True, 'flat')
+    assert page.css_path == './main.css'
+    other_page = elements.SubPage('test', 'Test')
+    other_page.set_css_path(True, 'nested')
+    assert other_page.css_path == '../main.css'
+
+
+def test_set_css_path_of_unlinked_page():
+    page = elements.UnlinkedPage('test', 'Test', ['path', 'to', 'page'])
+    page.set_css_path(True)
+    assert page.css_path == '../../../main.css'
+
+
+def test_set_css_path_with_no_debug():
+    page = elements.Page('test', 'Test')
+    page.set_css_path()
+    assert page.css_path == '/main.min.css'
+    sub_page = elements.SubPage('test', 'Test')
+    sub_page.set_css_path()
+    assert sub_page.css_path == '/main.min.css'
+    unlinked_page = elements.UnlinkedPage('test', 'Test', ['path', 'to', 'page'])
+    unlinked_page.set_css_path()
+    assert unlinked_page.css_path == '/main.min.css'
