@@ -1,5 +1,7 @@
 import os
 import shutil
+
+import pytest
 from zorn import parser
 
 
@@ -34,3 +36,10 @@ def test_send_task_args():
     parser_.add_arguments()
     parser_.parse_arguments()
     assert parser_.task_arguments['task_args'] == ['basic']
+
+
+def test_admin_parser_unknown_task():
+    with pytest.raises(SystemExit):
+        parser_ = parser.AdminParser(['unknown:task'])
+        parser_.add_arguments()
+        parser_.parse_arguments()

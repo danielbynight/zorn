@@ -99,7 +99,16 @@ class AdminParser(Parser):
 
     def add_arguments(self):
         super().add_arguments()
-        self._parser.add_argument('task', help='the admin task you wish to perform')
+
+        def available_task(input_task):
+            task = input_task.split(':')[0]
+            if task not in AdminParser.TASKS:
+                raise argparse.ArgumentTypeError(
+                    'The task "{0}" was not recognized. Available tasks: {1}'.format(task, AdminParser.TASKS)
+                )
+            return input_task
+
+        self._parser.add_argument('task', help='the admin task you wish to perform', type=available_task)
         self._parser.add_argument(
             '-u', '--update', action='store_true', help='update settings after task is run (if applicable)'
         )
