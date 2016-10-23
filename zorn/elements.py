@@ -20,6 +20,7 @@ class Page:
 
         self.sub_pages = sub_pages
         self.body_content = None
+        self.css_path = None
 
     def generate_content_menu(self, url_style):
         content = '#' + self.title + '\n'
@@ -52,6 +53,12 @@ class Page:
             body_content = ''
         self.body_content = body_content
 
+    def set_css_path(self, debug=False, url_style='flat'):
+        if debug is False:
+            self.css_path = '/main.min.css'
+        else:
+            self.css_path = './main.css'
+
     @staticmethod
     def render_html(context, templates_dir):
         env = jinja2.Environment()
@@ -66,6 +73,16 @@ class SubPage(Page):
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
 
+    def set_css_path(self, debug=False, url_style='flat'):
+        if debug is False:
+            self.css_path = '/main.min.css'
+        else:
+            css_file = './main.css'
+            if url_style == 'nested':
+                self.css_path = '../' + css_file
+            else:
+                self.css_path = './main.css'
+
 
 class UnlinkedPage(Page):
     def __init__(self, title, file_name, path=None):
@@ -75,6 +92,12 @@ class UnlinkedPage(Page):
         elif type(path) == str:
             path = path.split('/')
         self.path = path
+
+    def set_css_path(self, debug=False, url_style='flat'):
+        if debug is False:
+            self.css_path = '/main.min.css'
+        else:
+            self.css_path = ''.join(['../' for _ in range(len(self.path))]) + 'main.css'
 
 
 class Website:
@@ -149,13 +172,8 @@ class Website:
                 active_nav_links.append(parent_page.title)
 
             # generate css path
-
-            css_file = 'main.css' if self.debug is True else 'main.min.css'
-            css_path = './' + css_file
-            if type(page) is SubPage and self.url_style == 'nested':
-                css_path = '../' + css_file
-            elif type(page) is UnlinkedPage:
-                css_path = ''.join(['../' for _ in range(len(page.path))]) + css_file
+            page.set_css_path(self.debug, self.url_style)
+            css_path = page.css_path
 
             back_path = ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../'
 
