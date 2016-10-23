@@ -12,12 +12,14 @@ def test_task():
     task = tasks.Task()
     assert task.verbosity == 1
 
+
 def test_task_run():
     task = tasks.Task()
     with StringIO() as stream:
         sys.stdout = stream
         task.run()
         assert 'Welcome to zorn!' in stream.getvalue()
+
 
 def test_comunicate_standard_verbosity():
     task = tasks.Task(verbosity=1)
