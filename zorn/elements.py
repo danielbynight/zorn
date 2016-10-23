@@ -19,6 +19,7 @@ class Page:
                 raise errors.PageError('All elements of submenu have to be of type zorn.Elements.SubPage')
 
         self.sub_pages = sub_pages
+        self.body_content = None
 
     def generate_content_menu(self, url_style):
         content = '#' + self.title + '\n'
@@ -31,6 +32,24 @@ class Page:
 
     def __str__(self):
         return self.title
+
+    def set_content_from_md(self, markdown_dir, markdown_extensions=None, url_style='flat'):
+        if os.path.isfile(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))):
+            with open(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))) as f:
+                body_content = f.read()
+                body_content = markdown.markdown(
+                    body_content,
+                    extensions=markdown_extensions
+                )
+        elif type(self) is Page and self.sub_pages != []:
+            # Create menu-page in case no content was set for this page
+            body_content = markdown.markdown(
+                self.generate_content_menu(url_style),
+                extensions=markdown_extensions
+            )
+        else:
+            body_content = ''
+        self.body_content = body_content
 
     @staticmethod
     def render_html(context, templates_dir):
@@ -119,22 +138,8 @@ class Website:
             if type(page) is SubPage:
                 parent_page = [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
 
-            # get page content
-            if os.path.isfile(os.path.join(self.markdown_dir, '{0}.md'.format(page.file_name))):
-                with open(os.path.join(self.markdown_dir, '{0}.md'.format(page.file_name))) as f:
-                    body_content = f.read()
-                    body_content = markdown.markdown(
-                        body_content,
-                        extensions=self.markdown_extensions
-                    )
-            elif type(page) is Page and page.sub_pages != []:
-                # Create menu-page in case no content was set for this page
-                body_content = markdown.markdown(
-                    page.generate_content_menu(self.url_style),
-                    extensions=self.markdown_extensions
-                )
-            else:
-                body_content = ''
+            page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
+            body_content = page.body_content
 
             footer_content = '&copy; {0} {1}'.format(datetime.datetime.now().year, self.author)
 
@@ -145,7 +150,6 @@ class Website:
                 active_nav_links.append(parent_page.title)
 
             # generate css path
-
             css_file = 'main.css' if self.debug is True else 'main.min.css'
             css_path = './' + css_file
             if type(page) is SubPage and self.url_style == 'nested':
