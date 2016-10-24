@@ -132,3 +132,91 @@ def test_set_css_path_with_no_debug():
     unlinked_page = elements.UnlinkedPage('test', 'Test', ['path', 'to', 'page'])
     unlinked_page.set_css_path()
     assert unlinked_page.css_path == '/main.min.css'
+
+
+def test_relative_path_from_page_to_page_with_debug_off():
+    from_page = elements.Page('test 1', 'test1')
+    to_page = elements.Page('test 2', 'test2')
+    relative_path = to_page.get_relative_path(from_page, 'flat', False)
+    assert relative_path == '/test2'
+
+
+def test_relative_path_from_page_to_page_with_debug_on():
+    from_page = elements.Page('test 1', 'test1')
+    to_page = elements.Page('test 2', 'test2')
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == './test2.html'
+
+
+def test_relative_path_from_page_to_sub_page_with_flat_url_style_and_debug_off():
+    from_page = elements.Page('test 1', 'test1')
+    to_page = elements.SubPage('test 3', 'test3')
+    relative_path = to_page.get_relative_path(from_page, 'flat', False)
+    assert relative_path == '/test3'
+
+
+def test_relative_path_from_page_to_sub_page_with_flat_url_style_and_debug_on():
+    from_page = elements.Page('test 1', 'test1')
+    to_page = elements.SubPage('test 3', 'test3')
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == './test3.html'
+
+
+def test_relative_path_from_page_to_sub_page_with_nested_url_style_and_debug_off():
+    from_page = elements.Page('test 1', 'test1')
+    parent_page = elements.Page('test 2', 'test2')
+    to_page = elements.SubPage('test 3', 'test3')
+    to_page.parent_page = parent_page
+    relative_path = to_page.get_relative_path(from_page, 'nested', False)
+    assert relative_path == '/test2/test3'
+
+
+def test_relative_path_from_page_to_sub_page_with_nested_url_style_and_debug_on():
+    from_page = elements.Page('test 1', 'test1')
+    parent_page = elements.Page('test 2', 'test2')
+    to_page = elements.SubPage('test 3', 'test3')
+    to_page.parent_page = parent_page
+    relative_path = to_page.get_relative_path(from_page, 'nested', True)
+    assert relative_path == './test2/test3.html'
+
+
+def test_relative_path_from_sub_page_to_page_with_flat_url_style_and_debug_off():
+    from_page = elements.SubPage('test 3', 'test3')
+    to_page = elements.Page('test 1', 'test1')
+    relative_path = to_page.get_relative_path(from_page, 'flat', False)
+    assert relative_path == '/test1'
+
+
+def test_relative_path_from_sub_page_to_page_with_flat_url_style_and_debug_on():
+    from_page = elements.SubPage('test 3', 'test3')
+    to_page = elements.Page('test 1', 'test1')
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == './test1.html'
+
+
+def test_relative_path_from_page_to_unlinked_page_with_debug_off():
+    from_page = elements.Page('test 1', 'test1')
+    to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', False)
+    assert relative_path == '/path/to/page/test2'
+
+
+def test_relative_path_from_page_to_unlinked_page_with_debug_on():
+    from_page = elements.Page('test 1', 'test1')
+    to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == './path/to/page/test2.html'
+
+
+def test_relative_path_from_subpage_to_unlinked_page_with_debug_off():
+    from_page = elements.SubPage('test 1', 'test1')
+    to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', False)
+    assert relative_path == '/path/to/page/test2'
+
+
+def test_relative_path_from_subpage_to_unlinked_page_with_debug_on():
+    from_page = elements.SubPage('test 1', 'test1')
+    to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'nested', True)
+    assert relative_path == '../path/to/page/test2.html'

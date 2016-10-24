@@ -184,7 +184,8 @@ class UnlinkedPage(Page):
                 else:
                     relative_path = '../' + relative_path
             elif type(from_page) is UnlinkedPage:
-                return ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
+                relative_path = ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
+            return relative_path
 
 
 class Website:
