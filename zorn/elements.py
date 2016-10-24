@@ -75,6 +75,23 @@ class Page:
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
+    def get_relative_path(self, from_page, url_style='flat', debug=False):
+        if debug is False:
+            if self.file_name == 'index':
+                return '/'
+            else:
+                return '/' + self.file_name
+        else:
+            if type(from_page) is Page:
+                return './' + self.file_name + '.html'
+            elif type(from_page) is SubPage:
+                if url_style == 'nested':
+                    return '../' + self.file_name + '.html'
+                else:
+                    return './' + self.file_name + '.html'
+            elif type(from_page) is UnlinkedPage:
+                return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
+
 
 class SubPage(Page):
     """A helper class to avoid attempts of creation of sub-sub pages"""
@@ -108,6 +125,26 @@ class SubPage(Page):
             with open(page_path, 'w+') as f:
                 f.write(self.html)
 
+    def get_relative_path(self, from_page, url_style='flat', debug=False):
+        if debug is False:
+            if url_style == 'flat':
+                return '/' + self.file_name
+            else:
+                return '/' + self.parent_page.file_name + '/' + self.file_name
+        else:
+            if type(from_page) is Page:
+                if url_style == 'flat':
+                    return './' + self.file_name + '.html'
+                else:
+                    return './' + self.parent_page.file_name + '/' + self.file_name + '.html'
+            elif type(from_page) is SubPage:
+                if url_style == 'flat':
+                    return '../' + self.file_name + '.html'
+                else:
+                    return '../' + self.parent_page.file_name + '/' + self.file_name + '.html'
+            elif type(from_page) is UnlinkedPage:
+                return ''.join(['../' for _ in range(len(from_page.path))])
+
 
 class UnlinkedPage(Page):
     def __init__(self, title, file_name, path=None):
@@ -133,6 +170,21 @@ class UnlinkedPage(Page):
         page_path = os.path.join(final_dir, '{0}.html'.format(self.file_name))
         with open(page_path, 'w+') as f:
             f.write(self.html)
+
+    def get_relative_path(self, from_page, url_style='flat', debug=False):
+        if debug is False:
+            return '/' + '/'.join(self.path) + '/' + self.file_name
+        else:
+            relative_path = '/'.join(self.path) + '/' + self.file_name + '.html'
+            if type(from_page) is Page:
+                relative_path = './' + relative_path
+            elif type(from_page) is SubPage:
+                if url_style == 'flat':
+                    relative_path = './' + relative_path
+                else:
+                    relative_path = '../' + relative_path
+            elif type(from_page) is UnlinkedPage:
+                return ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
 
 
 class Website:
