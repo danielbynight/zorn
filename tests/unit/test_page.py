@@ -220,3 +220,10 @@ def test_relative_path_from_subpage_to_unlinked_page_with_debug_on():
     to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
     relative_path = to_page.get_relative_path(from_page, 'nested', True)
     assert relative_path == '../path/to/page/test2.html'
+
+
+def test_relative_path_from_unlinked_page_to_unlinked_page_with_debug_on():
+    from_page = elements.UnlinkedPage('test 1', 'test1', ['path', 'to', 'the', 'page'])
+    to_page = elements.UnlinkedPage('test 2', 'test2', ['another', 'one'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == '../../../../another/one/test2.html'
