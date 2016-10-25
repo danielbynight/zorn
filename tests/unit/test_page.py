@@ -166,7 +166,7 @@ def test_relative_path_from_page_to_sub_page_with_nested_url_style_and_debug_off
     from_page = elements.Page('test 1', 'test1')
     parent_page = elements.Page('test 2', 'test2')
     to_page = elements.SubPage('test 3', 'test3')
-    to_page.parent_page = parent_page
+    to_page.parent_page = parent_page.file_name
     relative_path = to_page.get_relative_path(from_page, 'nested', False)
     assert relative_path == '/test2/test3'
 
@@ -175,7 +175,7 @@ def test_relative_path_from_page_to_sub_page_with_nested_url_style_and_debug_on(
     from_page = elements.Page('test 1', 'test1')
     parent_page = elements.Page('test 2', 'test2')
     to_page = elements.SubPage('test 3', 'test3')
-    to_page.parent_page = parent_page
+    to_page.parent_page = parent_page.file_name
     relative_path = to_page.get_relative_path(from_page, 'nested', True)
     assert relative_path == './test2/test3.html'
 

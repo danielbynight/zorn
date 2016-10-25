@@ -115,7 +115,7 @@ class SubPage(Page):
             with open(page_path, 'w+') as f:
                 f.write(self.html)
         else:
-            page_dir_path = os.path.join(site_dir, self.parent_page.file_name)
+            page_dir_path = os.path.join(site_dir, self.parent_page)
             if not os.path.exists(page_dir_path):
                 os.mkdir(page_dir_path)
             page_path = os.path.join(page_dir_path, '{0}.html'.format(self.file_name))
@@ -127,18 +127,18 @@ class SubPage(Page):
             if url_style == 'flat':
                 return '/' + self.file_name
             else:
-                return '/' + self.parent_page.file_name + '/' + self.file_name
+                return '/' + self.parent_page + '/' + self.file_name
         else:
             if type(from_page) is Page:
                 if url_style == 'flat':
                     return './' + self.file_name + '.html'
                 else:
-                    return './' + self.parent_page.file_name + '/' + self.file_name + '.html'
+                    return './' + self.parent_page + '/' + self.file_name + '.html'
             elif type(from_page) is SubPage:
                 if url_style == 'flat':
                     return '../' + self.file_name + '.html'
                 else:
-                    return '../' + self.parent_page.file_name + '/' + self.file_name + '.html'
+                    return '../' + self.parent_page + '/' + self.file_name + '.html'
             elif type(from_page) is UnlinkedPage:
                 return ''.join(['../' for _ in range(len(from_page.path))])
 
@@ -243,7 +243,7 @@ class Website:
         for main_page in self.pages:
             if type(main_page) is Page:
                 for sub_page in main_page.sub_pages:
-                    sub_page.parent_page = main_page
+                    sub_page.parent_page = main_page.file_name
 
     def generate_pages(self):
         self.set_parent_pages()
@@ -252,10 +252,10 @@ class Website:
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
 
             # list of links which should have class "active" in nav bar
-            active_nav_links = [page.title]
+            active_nav_links = [page.file_name]
             if type(page) is SubPage:
                 # if the page in question is a subpage then activate parent too
-                active_nav_links.append(page.parent_page.title)
+                active_nav_links.append(page.parent_page)
 
             # generate css path
             page.set_css_path(self.debug, self.url_style)
