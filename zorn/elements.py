@@ -65,7 +65,11 @@ class Page:
         self.set_content_from_md(markdown_dir, markdown_extensions, url_style)
         self.set_css_path(debug, url_style)
 
+        def relative_path(to_page, from_page, url_style='flat', debug=False):
+            return to_page.get_relative_path(from_page, url_style, debug)
+
         env = jinja2.Environment()
+        env.filters['relativepath'] = relative_path
         env.loader = jinja2.FileSystemLoader(templates_dir)
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
@@ -272,6 +276,7 @@ class Website:
                 'page_type': type(page).__name__,
                 'body_content': page.body_content,
                 'current_year': datetime.datetime.now().year,
+                'current_page': page,
                 'pages': [page for page in self.pages if type(page) is Page],
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
