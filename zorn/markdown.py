@@ -24,7 +24,7 @@ class MarkdownParser:
         split_line = re.split('@@(\w*)@@', line)
         new_line = ''
         for i in range(len(split_line)):
-            if 1 % 2 == 0:
+            if i % 2 != 0:
                 # in this case, split_line[i] is a route
                 new_line += self.get_path_from_page_name(split_line[i])
             else:
@@ -32,7 +32,7 @@ class MarkdownParser:
                 new_line += split_line[i]
         return new_line
 
-    def convert_to_html(self, md_content, extensions):
+    def convert_to_html(self, md_content, extensions=None):
         new_content = ''
         for line in md_content.splitlines(True):
             new_content += self.convert_routes(line)
