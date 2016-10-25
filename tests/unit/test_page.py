@@ -208,11 +208,19 @@ def test_relative_path_from_page_to_unlinked_page_with_debug_on():
     assert relative_path == './path/to/page/test2.html'
 
 
-def test_relative_path_from_subpage_to_unlinked_page_with_debug_off():
+def test_relative_path_from_subpage_to_unlinked_page_with_flat_url_style_debug_off():
     from_page = elements.SubPage('test 1', 'test1')
     to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
     relative_path = to_page.get_relative_path(from_page, 'flat', False)
     assert relative_path == '/path/to/page/test2'
+
+
+def test_relative_path_from_subpage_to_unlinked_page_with_flat_url_style_debug_on():
+    from_page = elements.SubPage('test 1', 'test1')
+    from_page.parent_page = 'test3'
+    to_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == './path/to/page/test2.html'
 
 
 def test_relative_path_from_subpage_to_unlinked_page_with_debug_on():
@@ -227,3 +235,55 @@ def test_relative_path_from_unlinked_page_to_unlinked_page_with_debug_on():
     to_page = elements.UnlinkedPage('test 2', 'test2', ['another', 'one'])
     relative_path = to_page.get_relative_path(from_page, 'flat', True)
     assert relative_path == '../../../../another/one/test2.html'
+
+
+def test_relative_path_of_index_page_with_debug_off():
+    from_page = elements.SubPage('test 1', 'test2')
+    to_page = elements.Page('Home', 'index')
+    relative_path = to_page.get_relative_path(from_page)
+    assert relative_path == '/'
+
+
+def test_relative_path_from_subpage_to_page_with_nested_url_style_and_debug_on():
+    from_page = elements.SubPage('test 1', 'test2')
+    to_page = elements.Page('test 2', 'test2')
+    relative_path = to_page.get_relative_path(from_page, 'nested', True)
+    assert relative_path == '../test2.html'
+
+
+def test_relative_path_from_unlinked_page_to_page_with_debug_on():
+    to_page = elements.Page('test 1', 'test2')
+    from_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'the', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == '../../../../test2.html'
+
+
+def test_relative_path_from_subpage_to_subpage_with_flat_url_style_and_debug_on():
+    to_page = elements.SubPage('test 1', 'test2')
+    from_page = elements.SubPage('test 2', 'test2')
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == './test2.html'
+
+
+def test_relative_path_from_subpage_to_subpage_with_nested_url_style_and_debug_on():
+    to_page = elements.SubPage('test 1', 'test2')
+    from_page = elements.SubPage('test 2', 'test2')
+    to_page.parent_page = 'test3'
+    relative_path = to_page.get_relative_path(from_page, 'nested', True)
+    assert relative_path == '../test3/test2.html'
+
+
+def test_relative_path_from_unlinked_page_to_subpage_with_nested_url_style_and_debug_on():
+    to_page = elements.SubPage('test 1', 'test2')
+    to_page.parent_page = 'test3'
+    from_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'the', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'nested', True)
+    assert relative_path == '../../../../test3/test2.html'
+
+
+def test_relative_path_from_unlinked_page_to_subpage_with_flat_url_style_and_debug_on():
+    to_page = elements.SubPage('test 1', 'test2')
+    to_page.parent_page = 'test3'
+    from_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'the', 'page'])
+    relative_path = to_page.get_relative_path(from_page, 'flat', True)
+    assert relative_path == '../../../../test2.html'

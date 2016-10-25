@@ -140,11 +140,15 @@ class SubPage(Page):
                     return './' + self.parent_page + '/' + self.file_name + '.html'
             elif type(from_page) is SubPage:
                 if url_style == 'flat':
-                    return '../' + self.file_name + '.html'
+                    return './' + self.file_name + '.html'
                 else:
                     return '../' + self.parent_page + '/' + self.file_name + '.html'
             elif type(from_page) is UnlinkedPage:
-                return ''.join(['../' for _ in range(len(from_page.path))])
+                if url_style == 'flat':
+                    return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
+                else:
+                    return ''.join(['../' for _ in range(len(from_page.path))]) + \
+                           self.parent_page + '/' + self.file_name + '.html'
 
 
 class UnlinkedPage(Page):
