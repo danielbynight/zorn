@@ -54,17 +54,24 @@ def test_page_casting_to_string():
 
 def test_page_render_html():
     templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
-    markdown_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'example_project', 'md')
     page = elements.Page('index', 'index')
-    page.render_html(
-        {'test_content': 'This is a test.'}, templates_dir, markdown_dir, None, 'flat', False
-    )
+    page.render_html({'test_content': 'This is a test.'}, templates_dir, 'flat', False)
     assert page.html == 'This is a test.'
 
 
 def test_set_content_from_md():
+    page1 = elements.Page('test 1', 'test1')
+    page2 = elements.Page('test 2', 'test2')
+    page3 = elements.Page('home', 'index')
+    all_pages = [page1, page2, page3]
     page = elements.Page('Test', 'test_page')
-    page.set_content_from_md(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'md'))
+    page.set_content_from_md(
+        all_pages,
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'md'),
+        None,
+        'flat',
+        False
+    )
     assert '<h1>This is a test</h1>' in page.body_content
     assert '<p>There is nothing to see here</p>' in page.body_content
 
