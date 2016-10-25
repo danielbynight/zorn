@@ -181,3 +181,22 @@ def test_generate_unlinked_page():
     )
     assert os.path.exists(subpage_path)
     shutil.rmtree(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'test_project', 'sub_dir'))
+
+
+def test_website_set_parent_pages():
+    pages = [
+        elements.Page('Test 1', 'test1', [elements.SubPage('sp11', 'sp11'), elements.SubPage('sp12', 'sp12')]),
+        elements.Page('Test 2', 'test2', [elements.SubPage('sp21', 'sp21'), elements.SubPage('sp22', 'sp22')]),
+    ]
+    website = elements.Website({
+        'root_dir': 'test_root_dir',
+        'project_name': 'test_project_name',
+        'pages': pages
+    })
+    sub_pages = [page for page in website.pages if type(pages) is elements.SubPage]
+    for sub_page in sub_pages:
+        assert sub_page.parent_page is None
+    website.set_parent_pages()
+    sub_pages = [page for page in website.pages if type(pages) is elements.SubPage]
+    for sub_page in sub_pages:
+        assert sub_page.parent_page in ['test1', 'test2']

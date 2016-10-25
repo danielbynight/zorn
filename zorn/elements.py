@@ -65,7 +65,11 @@ class Page:
         self.set_content_from_md(markdown_dir, markdown_extensions, url_style)
         self.set_css_path(debug, url_style)
 
+        def relative_path(to_page, from_page, url_style='flat', debug=False):
+            return to_page.get_relative_path(from_page, url_style, debug)
+
         env = jinja2.Environment()
+        env.filters['relativepath'] = relative_path
         env.loader = jinja2.FileSystemLoader(templates_dir)
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
@@ -75,6 +79,23 @@ class Page:
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
+    def get_relative_path(self, from_page, url_style='flat', debug=False):
+        if debug is False:
+            if self.file_name == 'index':
+                return '/'
+            else:
+                return '/' + self.file_name
+        else:
+            if type(from_page) is Page:
+                return './' + self.file_name + '.html'
+            elif type(from_page) is SubPage:
+                if url_style == 'nested':
+                    return '../' + self.file_name + '.html'
+                else:
+                    return './' + self.file_name + '.html'
+            elif type(from_page) is UnlinkedPage:
+                return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
+
 
 class SubPage(Page):
     """A helper class to avoid attempts of creation of sub-sub pages"""
@@ -82,9 +103,6 @@ class SubPage(Page):
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
         self.parent_page = None
-
-    def set_parent_page(self, parent_page):
-        self.parent_page = parent_page
 
     def set_css_path(self, debug=False, url_style='flat'):
         if debug is False:
@@ -101,12 +119,36 @@ class SubPage(Page):
             with open(page_path, 'w+') as f:
                 f.write(self.html)
         else:
-            page_dir_path = os.path.join(site_dir, self.parent_page.file_name)
+            page_dir_path = os.path.join(site_dir, self.parent_page)
             if not os.path.exists(page_dir_path):
                 os.mkdir(page_dir_path)
             page_path = os.path.join(page_dir_path, '{0}.html'.format(self.file_name))
             with open(page_path, 'w+') as f:
                 f.write(self.html)
+
+    def get_relative_path(self, from_page, url_style='flat', debug=False):
+        if debug is False:
+            if url_style == 'flat':
+                return '/' + self.file_name
+            else:
+                return '/' + self.parent_page + '/' + self.file_name
+        else:
+            if type(from_page) is Page:
+                if url_style == 'flat':
+                    return './' + self.file_name + '.html'
+                else:
+                    return './' + self.parent_page + '/' + self.file_name + '.html'
+            elif type(from_page) is SubPage:
+                if url_style == 'flat':
+                    return './' + self.file_name + '.html'
+                else:
+                    return '../' + self.parent_page + '/' + self.file_name + '.html'
+            elif type(from_page) is UnlinkedPage:
+                if url_style == 'flat':
+                    return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
+                else:
+                    return ''.join(['../' for _ in range(len(from_page.path))]) + \
+                           self.parent_page + '/' + self.file_name + '.html'
 
 
 class UnlinkedPage(Page):
@@ -133,6 +175,22 @@ class UnlinkedPage(Page):
         page_path = os.path.join(final_dir, '{0}.html'.format(self.file_name))
         with open(page_path, 'w+') as f:
             f.write(self.html)
+
+    def get_relative_path(self, from_page, url_style='flat', debug=False):
+        if debug is False:
+            return '/' + '/'.join(self.path) + '/' + self.file_name
+        else:
+            relative_path = '/'.join(self.path) + '/' + self.file_name + '.html'
+            if type(from_page) is Page:
+                relative_path = './' + relative_path
+            elif type(from_page) is SubPage:
+                if url_style == 'flat':
+                    relative_path = './' + relative_path
+                else:
+                    relative_path = '../' + relative_path
+            elif type(from_page) is UnlinkedPage:
+                relative_path = ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
+            return relative_path
 
 
 class Website:
@@ -189,22 +247,23 @@ class Website:
                     all_pages.extend(page.sub_pages)
         self.pages = all_pages
 
-    def generate_pages(self):
-        for page in self.pages:
+    def set_parent_pages(self):
+        for main_page in self.pages:
+            if type(main_page) is Page:
+                for sub_page in main_page.sub_pages:
+                    sub_page.parent_page = main_page.file_name
 
-            # get parent page in case of sub page
-            if type(page) is SubPage:
-                page.set_parent_page(
-                    [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
-                )
+    def generate_pages(self):
+        self.set_parent_pages()
+        for page in self.pages:
 
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
 
             # list of links which should have class "active" in nav bar
-            active_nav_links = [page.title]
+            active_nav_links = [page.file_name]
             if type(page) is SubPage:
                 # if the page in question is a subpage then activate parent too
-                active_nav_links.append(page.parent_page.title)
+                active_nav_links.append(page.parent_page)
 
             # generate css path
             page.set_css_path(self.debug, self.url_style)
@@ -221,6 +280,7 @@ class Website:
                 'page_type': type(page).__name__,
                 'body_content': page.body_content,
                 'current_year': datetime.datetime.now().year,
+                'current_page': page,
                 'pages': [page for page in self.pages if type(page) is Page],
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
