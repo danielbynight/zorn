@@ -44,6 +44,16 @@ def test_convert_routes():
     assert parser.convert_routes(line) == 'Click [here](/) to go home. Click [here](/test2) to go somewhere else.'
 
 
+def test_escape_non_routes():
+    page1 = elements.Page('test 1', 'test1')
+    page2 = elements.Page('test 2', 'test2')
+    page3 = elements.Page('home', 'index')
+    all_pages = [page1, page2, page3]
+    parser = markdown.MarkdownParser(page1, all_pages, 'flat', False)
+    line = 'See how I used \@\@?'
+    assert parser.escape_non_routes(line) == 'See how I used @@?'
+
+
 def test_convert_to_html():
     page1 = elements.Page('test 1', 'test1')
     page2 = elements.Page('test 2', 'test2')

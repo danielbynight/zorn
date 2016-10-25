@@ -18,6 +18,9 @@ class MarkdownParser:
                 return page.get_relative_path(self.current_page, self.url_style, self.debug)
         raise errors.PathNotFound('No page found with file name {0}.'.format(page_name))
 
+    def escape_non_routes(self, line=''):
+        return line.replace('\@\@', '@@')
+
     def convert_routes(self, line):
         # Split the line like so:
         # ['normal text', 'page_name', 'more normal text', 'other_page_name', ... , 'text'}
@@ -30,7 +33,7 @@ class MarkdownParser:
             else:
                 # in this case, split_line[i] is just normal text
                 new_line += split_line[i]
-        return new_line
+        return self.escape_non_routes(new_line)
 
     def convert_to_html(self, md_content, extensions=None):
         new_content = ''
