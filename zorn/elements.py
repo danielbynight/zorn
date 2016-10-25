@@ -100,9 +100,6 @@ class SubPage(Page):
         super().__init__(title, file_name, [])
         self.parent_page = None
 
-    def set_parent_page(self, parent_page):
-        self.parent_page = parent_page
-
     def set_css_path(self, debug=False, url_style='flat'):
         if debug is False:
             self.css_path = '/main.min.css'
@@ -242,14 +239,15 @@ class Website:
                     all_pages.extend(page.sub_pages)
         self.pages = all_pages
 
-    def generate_pages(self):
-        for page in self.pages:
+    def set_parent_pages(self):
+        for main_page in self.pages:
+            if type(main_page) is Page:
+                for sub_page in main_page.sub_pages:
+                    sub_page.parent_page = main_page
 
-            # get parent page in case of sub page
-            if type(page) is SubPage:
-                page.set_parent_page(
-                    [parent_page for parent_page in self.pages if page in parent_page.sub_pages].pop()
-                )
+    def generate_pages(self):
+        self.set_parent_pages()
+        for page in self.pages:
 
             page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
 
