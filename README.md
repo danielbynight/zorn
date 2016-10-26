@@ -166,7 +166,7 @@ For example, considering that you have the following in your website settings:
         ]
     ]
     
-    DEBUG = OFF
+    DEBUG = False
     URL_STYLE = 'nested'
  
 Then the markdown content `...and you can click [here](@@not-bad@@) to check out a good page...` placed in `index.md` will be converted to
