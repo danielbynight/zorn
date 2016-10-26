@@ -210,17 +210,22 @@ class Website:
 
         self.url_style = settings['url_style'] if 'url_style' in settings_keys else 'flat'
 
+        self.site_dir = settings['site_dir'] if 'site_dir' in settings \
+            else self.root_dir
+
         self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+
+        self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
+            else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+        self.css_dir = settings['css_dir'] if 'css_dir' in settings_keys else self.static_dir
 
         self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
 
         self.markdown_extensions = settings['markdown_extensions'] if 'markdown_extensions' in settings_keys \
             else []
-
-        self.site_dir = settings['site_dir'] if 'site_dir' in settings \
-            else self.root_dir
 
         self.title = settings['site_title'] if 'site_title' in settings_keys \
             else self.project_name
