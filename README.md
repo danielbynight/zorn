@@ -1,19 +1,17 @@
 # Zorn - a static website generator with personality
 [![Build Status](https://travis-ci.org/xassbit/zorn.svg?branch=master)](https://travis-ci.org/xassbit/zorn)
 [![Coverage Status](https://coveralls.io/repos/github/xassbit/zorn/badge.svg?branch=master)](https://coveralls.io/github/xassbit/zorn?branch=master)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Zorn generates static websites which can then be served through a CDN.
-It was optimized to work with github pages. It supports:
+Zorn generates static websites. It's mostly a python package, but it's power can be combined [Gulp](https://www.npmjs.com/package/gulp)
+in order to further automate your workflow. It supports:
 - markdown content,
-- one level of nesting,
+- one level of page nesting in navigation,
 - [Jinja](http://jinja.pocoo.org) templates,
 - Sass.
   
-Zorn takes a lot of decisions for you. This is the out-of-the-box state of a zorn project:
-- a page of the website is composed of header, navigation, body and footer.
-The contents of the body can be imported from a markdown file.
-- the front-end of the website is generated with [Gulp](https://www.npmjs.com/package/gulp).
-Gulp also regenerates the website once new content was added or once settings were changed.
+Zorn takes a lot of decisions for you. A zorn project comes out-of-the box with the capability of generating pages out of markdown
+files and a few settings. It also comes with a pre-configured Gulpfile to help with the generation of html and css.
 
 # Quick start
 
@@ -52,6 +50,7 @@ A canonical zorn project has the following structure:
         |_main.css
         |_main.min.css
         |_index.html
+        |_(other pages).html
         
 where `my_project` is the name of your project.
 
@@ -78,16 +77,29 @@ The file `settings.scss` has the main style settings, like colors and fonts.
 By default the project comes equiped with a `package.json` file, which is used to install Gulp once run `npm install`.
 Gulp runs taks defined in `gulpfile.js`. Running `gulp` generates the css and html files.
 Running `gulp watch` has Gulp watching for changes in the `.scss` and `.md` files as well as `settings.py` and re-generate the site when this files are modified and saved.  
-You can also make changes to your project by interacting with zorn through `admin.py`. Here is a list of commands (all should be appended to `python admin.py`):
+
+You can interact with zorn in two ways. In order to create a project just invoke zorn from the command line by running `zorn`.
+This command can take some arguments:
+
+- `-v` or `--verbose` - make zorn talk more;
+- `-s` or `--silent` - silence zorn (when this setting is on and a name was given, the project will be generated without prompting you once);
+- `-n` or `--name` - pass the name you want to give your project (the project is created in a new directory with this name);
+- `-t` or `--title` - pass the title of your site;
+- `-a` or `--author` - pass the name of the author of your site;
+- `--style` - choose one of the available styles for your site;
+- `-g` or `--g` - add this flag if you want to generate the site after the creation process.
+
+After a project was created, you can manage it by interacting with zorn through `admin.py`. Here is a list of commands (all should be appended to `python admin.py` when run from your project's root directory):
 
 - `generate` - generates the website;
 - `importtemplates` - imports the templates locally (to your project's directory). Pass the flag `-u` or `-update` to update the settings file;
-- `importstyle:a_style` where `a_style` is one of the available styles - imports a style to the root directory of your project, i.e., creates a directory with the name of the style and the original Sass files of that style.
+- `importstyle:a_style` where `a_style` is one of the available styles - imports a style to the root directory of your project, i.e., creates a directory with the name of the style and the original Sass files of that style;
 - `--help` - lists all available commands.
-  
-In order to create a new project you can run `zorn`.
-If you already know what to call the project you can pass it as an argument, e.g. `zorn create my_project`.
-If you are bothered by the verbosity of zorn you can pass in the flag `-s` or `--silent`.
+
+These flags can also be appended:
+
+- `-v` or `--verbose` - make zorn talk more;
+- `-s` or `--silent` - silence zorn.
 
 # Settings
 
@@ -99,10 +111,14 @@ Here is a list of the available settings for a zorn project.
 
 *Optional settings*
 - `DEBUG` - a boolean which states if you are on not in debug mode. By default it's `True`.
+
+When in debug mode, the stylesheet used is `main.css` and the routes to pages point to files in your file system (they look like `../a-page/a-sub-page.html`).
+If debug mode is disabled, the stylesheet used is the minified one (`main.min.css`) and routes are relative to your site's root url (they look like `/a-page/a-sub-page`).
+
 When `False` the minified CSS is used.
 - `URL_STYLE` - can be `'flat'` or `'nested'`. If the former is chosen then all html files are generated in your root directory.
 If `nested` the subpages are generated into a folder with the name of their parent. This allows for urls like `domain/page/subpage`
-- `SITE_DIR` - the directory where your site will be generated to. `ROOT_DIR` by default.
+- `SITE_DIR` - the directory where your site will be generated. `ROOT_DIR` by default.
 Note: the stylesheets location may have to be updated in the gulpfile (for example, `.pipe(gulp.dest('site'));`).
 - `TEMPLATES_DIR` - in case you have your templates directory locally on the project's root then pass here its path.
 - `MARKDOWN_DIR` - the directory of you markdown content. By default it's `os.path.join(ROOT_DIR, 'md')`
@@ -113,7 +129,7 @@ Note: the stylesheets location may have to be updated in the gulpfile (for examp
 - `AUTHOR` - the site's author, by default it's the terminal user.
 - `KEYWORDS` - a list of keywords to your site, which are used in the *head* block.
 
-*Pages*
+# Pages
 Registed the pages of your website as a list of `zorn.elements.Page` objects under the setting `PAGES`.
 If you want some nesting then register the subpages as a list of `zorn.elements.SubPage` objects under the parent page.
 If you want to generate a page which doesn't feature in the top navigation, register it as an `UnlinkedPage`.
@@ -137,3 +153,26 @@ Example:
         # creates an unlinked page under the url domain/path/to/unlinked
         elements.UnlinkedPage('Unlinked Page, 'unlinked', ['path', 'to']
     ]
+    
+# Routing
+You can link from one page of your website to another from the markdown content by using a route tag.
+This is a tag which starts and ends with `@@` and encloses the file name of the page you want to link to (without '.md' or '.html').
+For example, considering that you have the following in your website settings:
+
+    PAGES = [
+        elements.Page('Home', 'index'),
+        elements.Page('Such a great page', 'great-page', [
+            elements.SubPage('Not a bad page either', 'not-bad')
+        ]
+    ]
+    
+    DEBUG = OFF
+    URL_STYLE = 'nested'
+ 
+Then the markdown content `...and you can click [here](@@not-bad@@) to check out a good page...` placed in `index.md` will be converted to
+
+    ...and you can click <a href="/great-page/not-bad">here</a> to check out a good page...`.
+ 
+   
+ If you wish for the characters `@@` to not indicate a route you can escape them with backslashes: `\@\@`.
+    
