@@ -171,7 +171,7 @@ For example, considering that you have the following in your website settings:
  
 Then the markdown content `...and you can click [here](@@not-bad@@) to check out a good page...` placed in `index.md` will be converted to
 
-    ...and you can click here <a href="/great-page/not-bad">here</a> to check out a good page...`.
+    ...and you can click <a href="/great-page/not-bad">here</a> to check out a good page...`.
  
    
  If you wish for the characters `@@` to not indicate a route you can escape them with backslashes: `\@\@`.
