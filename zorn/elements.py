@@ -2,9 +2,8 @@ import datetime
 import os
 
 import jinja2
-import markdown
 
-from zorn import errors
+from zorn import errors, markdown
 
 
 class Page:
@@ -35,18 +34,19 @@ class Page:
     def __str__(self):
         return self.title
 
-    def set_content_from_md(self, markdown_dir, markdown_extensions=None, url_style='flat'):
+    def set_content_from_md(self, all_pages, markdown_dir, markdown_extensions=None, url_style='flat', debug=False):
         markdown_extensions = [] if markdown_extensions is None else markdown_extensions
+        parser = markdown.MarkdownParser(self, all_pages, url_style, debug)
         if os.path.isfile(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))):
             with open(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
-                body_content = markdown.markdown(
+                body_content = parser.convert_to_html(
                     body_content,
                     extensions=markdown_extensions
                 )
         elif type(self) is Page and self.sub_pages != []:
             # Create menu-page in case no content was set for this page
-            body_content = markdown.markdown(
+            body_content = parser.convert_to_html(
                 self.generate_content_menu(url_style),
                 extensions=markdown_extensions
             )
@@ -60,9 +60,7 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    def render_html(self, context, templates_dir, markdown_dir, markdown_extensions=None, url_style='flat',
-                    debug=True):
-        self.set_content_from_md(markdown_dir, markdown_extensions, url_style)
+    def render_html(self, context, templates_dir, url_style='flat', debug=True):
         self.set_css_path(debug, url_style)
 
         def relative_path(to_page, from_page, url_style='flat', debug=False):
@@ -257,7 +255,8 @@ class Website:
         self.set_parent_pages()
         for page in self.pages:
 
-            page.set_content_from_md(self.markdown_dir, self.markdown_extensions, self.url_style)
+            page.set_content_from_md(self.pages, self.markdown_dir, self.markdown_extensions, self.url_style,
+                                     self.debug)
 
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.file_name]
@@ -285,6 +284,6 @@ class Website:
                 'active_nav_links': active_nav_links,
                 'url_style': self.url_style,
                 'css_path': page.css_path,
-            }, self.templates_dir, self.markdown_dir, self.markdown_extensions, self.url_style, self.debug)
+            }, self.templates_dir, self.url_style, self.debug)
 
             page.save_html(self.site_dir, url_style=self.url_style)

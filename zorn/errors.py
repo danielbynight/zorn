@@ -12,3 +12,7 @@ class NotAZornProjectError(Exception):
 
 class UnknownStyleError(Exception):
     pass
+
+
+class PathNotFound(Exception):
+    pass
