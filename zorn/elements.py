@@ -219,8 +219,6 @@ class Website:
         self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
-        self.css_dir = settings['css_dir'] if 'css_dir' in settings_keys else self.static_dir
-
         self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
 
