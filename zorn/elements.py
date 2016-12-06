@@ -5,6 +5,8 @@ import jinja2
 
 from zorn import errors, markdown
 
+from .filters import relative_path
+
 
 class Page:
     def __init__(self, title, file_name, sub_pages=None):
@@ -62,9 +64,6 @@ class Page:
 
     def render_html(self, context, templates_dir, url_style='flat', debug=True):
         self.set_css_path(debug, url_style)
-
-        def relative_path(to_page, from_page, url_style='flat', debug=False):
-            return to_page.get_relative_path(from_page, url_style, debug)
 
         env = jinja2.Environment()
         env.filters['relativepath'] = relative_path
@@ -214,7 +213,7 @@ class Website:
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
         self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
-            else os.path.join(self.static_dir, 'static')
+            else os.path.join(self.root_dir, 'static')
 
         self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
