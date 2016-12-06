@@ -21,7 +21,6 @@ def test_website_with_only_defaults():
     assert website.templates_dir == os.path.join(os.path.dirname(os.path.abspath(elements.__file__)), 'templates')
     assert website.markdown_dir == os.path.join(website.root_dir, 'md')
     assert website.markdown_extensions == []
-    assert website.site_dir == 'test_root_dir'
     assert website.title == 'test_project_name'
     assert website.subtitle == ''
     assert website.description == ''
@@ -41,7 +40,6 @@ def test_website_with_no_defaults():
         'templates_dir': 'test_templates_dir',
         'markdown_dir': 'test_markdown_dir',
         'markdown_extensions': ['test_markdown_extension'],
-        'site_dir': 'test_site_dir',
         'site_title': 'test_site_title',
         'site_subtitle': 'test_site_subtitle',
         'description': 'test description',
@@ -59,7 +57,6 @@ def test_website_with_no_defaults():
     assert website.templates_dir == 'test_templates_dir'
     assert website.markdown_dir == 'test_markdown_dir'
     assert website.markdown_extensions == ['test_markdown_extension']
-    assert website.site_dir == 'test_site_dir'
     assert website.title == 'test_site_title'
     assert website.subtitle == 'test_site_subtitle'
     assert website.description == 'test description'

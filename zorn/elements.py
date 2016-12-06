@@ -210,14 +210,11 @@ class Website:
 
         self.url_style = settings['url_style'] if 'url_style' in settings_keys else 'flat'
 
-        self.site_dir = settings['site_dir'] if 'site_dir' in settings \
-            else self.root_dir
-
         self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
         self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
-            else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+            else os.path.join(self.static_dir, 'static')
 
         self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
@@ -289,4 +286,4 @@ class Website:
                 'css_path': page.css_path,
             }, self.templates_dir, self.url_style, self.debug)
 
-            page.save_html(self.site_dir, url_style=self.url_style)
+            page.save_html(self.root_dir, url_style=self.url_style)
