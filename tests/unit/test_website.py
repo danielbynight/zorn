@@ -18,7 +18,8 @@ def test_website_with_only_defaults():
     # Test optional settings
     assert website.settings.debug is False
     assert website.settings.url_style == 'flat'
-    assert website.settings.templates_dir == os.path.join(os.path.dirname(os.path.abspath(elements.__file__)), 'templates')
+    assert website.settings.templates_dir == os.path.join(os.path.dirname(os.path.abspath(elements.__file__)),
+                                                          'templates')
     assert website.settings.markdown_dir == os.path.join(website.settings.root_dir, 'md')
     assert website.settings.markdown_extensions == []
     assert website.settings.title == 'test_project_name'

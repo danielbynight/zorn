@@ -190,6 +190,7 @@ class UnlinkedPage(Page):
                 relative_path = ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
             return relative_path
 
+
 class ZornSettings:
     def __init__(self, settings):
 
@@ -245,7 +246,6 @@ class ZornSettings:
         self.pages = all_pages
 
 
-
 class Website:
     def __init__(self, settings):
         self.settings = ZornSettings(settings)
@@ -260,7 +260,8 @@ class Website:
         self.set_parent_pages()
         for page in self.settings.pages:
 
-            page.set_content_from_md(self.settings.pages, self.settings.markdown_dir, self.settings.markdown_extensions, self.settings.url_style,
+            page.set_content_from_md(self.settings.pages, self.settings.markdown_dir,
+                                     self.settings.markdown_extensions, self.settings.url_style,
                                      self.settings.debug)
 
             # list of links which should have class "active" in nav bar
