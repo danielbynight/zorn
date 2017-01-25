@@ -190,8 +190,7 @@ class UnlinkedPage(Page):
                 relative_path = ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
             return relative_path
 
-
-class Website:
+class ZornSettings:
     def __init__(self, settings):
 
         settings_keys = settings.keys()
@@ -245,18 +244,24 @@ class Website:
                     all_pages.extend(page.sub_pages)
         self.pages = all_pages
 
+
+
+class Website:
+    def __init__(self, settings):
+        self.settings = ZornSettings(settings)
+
     def set_parent_pages(self):
-        for main_page in self.pages:
+        for main_page in self.settings.pages:
             if type(main_page) is Page:
                 for sub_page in main_page.sub_pages:
                     sub_page.parent_page = main_page.file_name
 
     def generate_pages(self):
         self.set_parent_pages()
-        for page in self.pages:
+        for page in self.settings.pages:
 
-            page.set_content_from_md(self.pages, self.markdown_dir, self.markdown_extensions, self.url_style,
-                                     self.debug)
+            page.set_content_from_md(self.settings.pages, self.settings.markdown_dir, self.settings.markdown_extensions, self.settings.url_style,
+                                     self.settings.debug)
 
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.file_name]
@@ -265,25 +270,25 @@ class Website:
                 active_nav_links.append(page.parent_page)
 
             # generate css path
-            page.set_css_path(self.debug, self.url_style)
+            page.set_css_path(self.settings.debug, self.settings.url_style)
 
             page.render_html({
-                'debug': self.debug,
-                'site_description': self.description,
-                'site_author': self.author,
-                'site_keywords': self.keywords,
-                'site_title': self.title,
-                'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
+                'debug': self.settings.debug,
+                'site_description': self.settings.description,
+                'site_author': self.settings.author,
+                'site_keywords': self.settings.keywords,
+                'site_title': self.settings.title,
+                'site_subtitle': self.settings.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
                 'back_path': ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../',
                 'page_type': type(page).__name__,
                 'body_content': page.body_content,
                 'current_year': datetime.datetime.now().year,
                 'current_page': page,
-                'pages': [page for page in self.pages if type(page) is Page],
+                'pages': [page for page in self.settings.pages if type(page) is Page],
                 'active_nav_links': active_nav_links,
-                'url_style': self.url_style,
+                'url_style': self.settings.url_style,
                 'css_path': page.css_path,
-            }, self.templates_dir, self.url_style, self.debug)
+            }, self.settings.templates_dir, self.settings.url_style, self.settings.debug)
 
-            page.save_html(self.root_dir, url_style=self.url_style)
+            page.save_html(self.settings.root_dir, url_style=self.settings.url_style)
