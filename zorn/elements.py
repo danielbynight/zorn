@@ -96,8 +96,6 @@ class Page:
 
 
 class SubPage(Page):
-    """A helper class to avoid attempts of creation of sub-sub pages"""
-
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
         self.parent_page = None
