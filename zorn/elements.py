@@ -6,6 +6,7 @@ import jinja2
 from zorn import errors, markdown
 
 from .filters import relative_path
+from .jinja_extensions import Url
 
 
 class Page:
@@ -65,7 +66,7 @@ class Page:
     def render_html(self, context, templates_dir, url_style='flat', debug=True):
         self.set_css_path(debug, url_style)
 
-        env = jinja2.Environment()
+        env = jinja2.Environment(extensions=[Url])
         env.filters['relativepath'] = relative_path
         env.loader = jinja2.FileSystemLoader(templates_dir)
         template = env.get_template(os.path.join('structure.html'))
