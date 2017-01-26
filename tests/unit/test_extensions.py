@@ -2,7 +2,7 @@ import os
 
 import jinja2
 
-from zorn.elements import ZornSettings, Page
+from zorn.elements import Page, ZornSettings
 from zorn.jinja_extensions import Url
 
 

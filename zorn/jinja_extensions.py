@@ -27,9 +27,8 @@ class Url(ZornJinjaExtension):
         for page in self.environment.zorn_settings.pages:
             if page.file_name == path:
                 the_page = page
-        url = the_page.get_relative_path(
+        return the_page.get_relative_path(
             self.environment.zorn_page,
             self.environment.zorn_settings.url_style,
             self.environment.zorn_settings.debug,
         )
-        return '/' + path + self.environment.zorn_settings.root_dir
