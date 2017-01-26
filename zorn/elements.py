@@ -37,21 +37,20 @@ class Page:
     def __str__(self):
         return self.title
 
-    def set_content_from_md(self, all_pages, markdown_dir, markdown_extensions=None, url_style='flat', debug=False):
-        markdown_extensions = [] if markdown_extensions is None else markdown_extensions
-        parser = markdown.MarkdownParser(self, all_pages, url_style, debug)
-        if os.path.isfile(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))):
-            with open(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))) as f:
+    def set_content_from_md(self, settings):
+        parser = markdown.MarkdownParser(self, settings.pages, settings.url_style, settings.debug)
+        if os.path.isfile(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))):
+            with open(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
                 body_content = parser.convert_to_html(
                     body_content,
-                    extensions=markdown_extensions
+                    extensions=settings.markdown_extensions
                 )
         elif type(self) is Page and self.sub_pages != []:
             # Create menu-page in case no content was set for this page
             body_content = parser.convert_to_html(
-                self.generate_content_menu(url_style),
-                extensions=markdown_extensions
+                self.generate_content_menu(settings.url_style),
+                extensions=settings.markdown_extensions
             )
         else:
             body_content = ''
@@ -63,12 +62,12 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    def render_html(self, context, templates_dir, url_style='flat', debug=True):
-        self.set_css_path(debug, url_style)
+    def render_html(self, context, settings):
+        self.set_css_path(settings.debug, settings.url_style)
 
         env = jinja2.Environment(extensions=[Url])
         env.filters['relativepath'] = relative_path
-        env.loader = jinja2.FileSystemLoader(templates_dir)
+        env.loader = jinja2.FileSystemLoader(settings.templates_dir)
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
 
@@ -258,9 +257,7 @@ class Website:
         self.set_parent_pages()
         for page in self.settings.pages:
 
-            page.set_content_from_md(self.settings.pages, self.settings.markdown_dir,
-                                     self.settings.markdown_extensions, self.settings.url_style,
-                                     self.settings.debug)
+            page.set_content_from_md(self.settings)
 
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.file_name]
@@ -271,7 +268,7 @@ class Website:
             # generate css path
             page.set_css_path(self.settings.debug, self.settings.url_style)
 
-            page.render_html({
+            context = {
                 'debug': self.settings.debug,
                 'site_description': self.settings.description,
                 'site_author': self.settings.author,
@@ -288,6 +285,8 @@ class Website:
                 'active_nav_links': active_nav_links,
                 'url_style': self.settings.url_style,
                 'css_path': page.css_path,
-            }, self.settings.templates_dir, self.settings.url_style, self.settings.debug)
+            }
+
+            page.render_html(context, self.settings)
 
             page.save_html(self.settings.root_dir, url_style=self.settings.url_style)

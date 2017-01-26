@@ -53,9 +53,13 @@ def test_page_casting_to_string():
 
 
 def test_page_render_html():
-    templates_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+    settings = elements.ZornSettings({
+        'root_dir': os.path.dirname(os.path.abspath(__file__)),
+        'project_name': 'test',
+        'templates_dir': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures'),
+    })
     page = elements.Page('index', 'index')
-    page.render_html({'test_content': 'This is a test.'}, templates_dir, 'flat', False)
+    page.render_html({'test_content': 'This is a test.'}, settings)
     assert page.html == 'This is a test.'
 
 
@@ -63,15 +67,14 @@ def test_set_content_from_md():
     page1 = elements.Page('test 1', 'test1')
     page2 = elements.Page('test 2', 'test2')
     page3 = elements.Page('home', 'index')
-    all_pages = [page1, page2, page3]
+    settings = elements.ZornSettings({
+        'root_dir': os.path.dirname(os.path.abspath(__file__)),
+        'project_name': 'test',
+        'pages': [page1, page2, page3],
+        'markdown_dir': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'md'),
+    })
     page = elements.Page('Test', 'test_page')
-    page.set_content_from_md(
-        all_pages,
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'md'),
-        None,
-        'flat',
-        False
-    )
+    page.set_content_from_md(settings)
     assert '<h1>This is a test</h1>' in page.body_content
     assert '<p>There is nothing to see here</p>' in page.body_content
 
