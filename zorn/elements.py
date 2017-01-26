@@ -66,6 +66,7 @@ class Page:
         self.set_css_path(settings.debug, settings.url_style)
 
         env = jinja2.Environment(extensions=[Url])
+        env.zorn_settings = settings
         env.filters['relativepath'] = relative_path
         env.loader = jinja2.FileSystemLoader(settings.templates_dir)
         template = env.get_template(os.path.join('structure.html'))
