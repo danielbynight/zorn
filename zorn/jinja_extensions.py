@@ -1,6 +1,8 @@
 from jinja2 import lexer, nodes
 from jinja2.ext import Extension
 
+from zorn.errors import PageNotFound
+
 
 class ZornJinjaExtension(Extension):
     def __init__(self, environment):
@@ -17,16 +19,18 @@ class Url(ZornJinjaExtension):
     def parse(self, parser):
         lineno = next(parser.stream).lineno
         token = parser.stream.expect(lexer.TOKEN_STRING)
-        path = nodes.Const(token.value)
-        call = self.call_method('_get_url', [path], lineno=lineno)
+        filename = nodes.Const(token.value)
+        call = self.call_method('_get_url', [filename], lineno=lineno)
 
         return nodes.Output([call], lineno=lineno)
 
-    def _get_url(self, path):
+    def _get_url(self, filename):
         the_page = None
         for page in self.environment.zorn_settings.pages:
-            if page.file_name == path:
+            if page.file_name == filename:
                 the_page = page
+        if the_page == None:
+            raise PageNotFound('The page with file name {0} was not found for this website.'.format(filename))
         return the_page.get_relative_path(
             self.environment.zorn_page,
             self.environment.zorn_settings.url_style,

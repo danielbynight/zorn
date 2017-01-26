@@ -16,3 +16,7 @@ class UnknownStyleError(Exception):
 
 class PathNotFound(Exception):
     pass
+
+
+class PageNotFound(Exception):
+    pass
