@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/xassbit/zorn/badge.svg?branch=master)](https://coveralls.io/github/xassbit/zorn?branch=master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Zorn generates static websites. It's mostly a python package, but it's power can be combined [Gulp](https://www.npmjs.com/package/gulp)
+Zorn generates static websites. It's mostly a python package, but its power can be combined [Gulp](https://www.npmjs.com/package/gulp)
 in order to further automate your workflow. It supports:
 - markdown content,
 - one level of page nesting in navigation,
