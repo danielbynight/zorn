@@ -2,9 +2,10 @@ import datetime
 import os
 
 import jinja2
+import markdown
 
 from zorn import errors
-import markdown
+
 from .jinja_extensions import Url
 
 
