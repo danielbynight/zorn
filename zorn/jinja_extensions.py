@@ -42,3 +42,13 @@ class Url(ZornReplacementTag):
             self.environment.zorn_settings.url_style,
             self.environment.zorn_settings.debug,
         )
+
+
+class Static(ZornReplacementTag):
+    tags = {'static'}
+
+    def _get_replacement(self, filename):
+        return self.environment.zorn_page.get_path_to_root(
+            self.environment.zorn_settings.debug,
+            self.environment.zorn_settings.url_style
+        ) + filename
