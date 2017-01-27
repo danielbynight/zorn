@@ -66,6 +66,7 @@ class Page:
 
         env = jinja2.Environment(extensions=[Url])
         env.zorn_settings = settings
+        env.zorn_page = self
         env.loader = jinja2.FileSystemLoader(settings.templates_dir)
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
@@ -75,6 +76,12 @@ class Page:
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
+    def get_path_to_root(self, url_style='flat', debug=False):
+        if debug is True:
+            return './'
+        else:
+            return '/'
+
     def get_relative_path(self, from_page, url_style='flat', debug=False):
         if debug is False:
             if self.file_name == 'index':
@@ -82,15 +89,7 @@ class Page:
             else:
                 return '/' + self.file_name
         else:
-            if type(from_page) is Page:
-                return './' + self.file_name + '.html'
-            elif type(from_page) is SubPage:
-                if url_style == 'nested':
-                    return '../' + self.file_name + '.html'
-                else:
-                    return './' + self.file_name + '.html'
-            elif type(from_page) is UnlinkedPage:
-                return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
+            return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
 
 
 class SubPage(Page):
@@ -120,6 +119,12 @@ class SubPage(Page):
             with open(page_path, 'w+') as f:
                 f.write(self.html)
 
+    def get_path_to_root(self, url_style='flat', debug=False):
+        if debug is False:
+            return '/'
+        else:
+            return './' if url_style == 'flat' else '../'
+
     def get_relative_path(self, from_page, url_style='flat', debug=False):
         if debug is False:
             if url_style == 'flat':
@@ -127,22 +132,11 @@ class SubPage(Page):
             else:
                 return '/' + self.parent_page + '/' + self.file_name
         else:
-            if type(from_page) is Page:
-                if url_style == 'flat':
-                    return './' + self.file_name + '.html'
-                else:
-                    return './' + self.parent_page + '/' + self.file_name + '.html'
-            elif type(from_page) is SubPage:
-                if url_style == 'flat':
-                    return './' + self.file_name + '.html'
-                else:
-                    return '../' + self.parent_page + '/' + self.file_name + '.html'
-            elif type(from_page) is UnlinkedPage:
-                if url_style == 'flat':
-                    return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
-                else:
-                    return ''.join(['../' for _ in range(len(from_page.path))]) + \
-                           self.parent_page + '/' + self.file_name + '.html'
+            if url_style == 'flat':
+                return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
+            else:
+                return from_page.get_path_to_root(url_style, debug) + self.parent_page + '/' +\
+                       self.file_name + '.html'
 
 
 class UnlinkedPage(Page):
@@ -170,21 +164,17 @@ class UnlinkedPage(Page):
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
+    def get_path_to_root(self, url_style='flat', debug=False):
+        if debug is False:
+            return '/'
+        else:
+            return ''.join(['../' for _ in range(len(self.path))])
+
     def get_relative_path(self, from_page, url_style='flat', debug=False):
         if debug is False:
             return '/' + '/'.join(self.path) + '/' + self.file_name
         else:
-            relative_path = '/'.join(self.path) + '/' + self.file_name + '.html'
-            if type(from_page) is Page:
-                relative_path = './' + relative_path
-            elif type(from_page) is SubPage:
-                if url_style == 'flat':
-                    relative_path = './' + relative_path
-                else:
-                    relative_path = '../' + relative_path
-            elif type(from_page) is UnlinkedPage:
-                relative_path = ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
-            return relative_path
+            return from_page.get_path_to_root(url_style, debug) + '/'.join(self.path) + '/' + self.file_name + '.html'
 
 
 class ZornSettings:
