@@ -12,6 +12,7 @@ class ZornJinjaExtension(Extension):
             zorn_page=None,
         )
 
+
 class ZornReplacementTag(ZornJinjaExtension):
     tags = {'tag'}
 
@@ -41,6 +42,7 @@ class Url(ZornReplacementTag):
             self.environment.zorn_settings.url_style,
             self.environment.zorn_settings.debug,
         )
+
 
 class Static(ZornReplacementTag):
     tags = {'static'}
