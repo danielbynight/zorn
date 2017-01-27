@@ -29,7 +29,7 @@ class Url(ZornJinjaExtension):
         for page in self.environment.zorn_settings.pages:
             if page.file_name == filename:
                 the_page = page
-        if the_page == None:
+        if the_page is None:
             raise PageNotFound('The page with file name {0} was not found for this website.'.format(filename))
         return the_page.get_relative_path(
             self.environment.zorn_page,
