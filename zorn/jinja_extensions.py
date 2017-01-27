@@ -18,11 +18,10 @@ class Url(ZornJinjaExtension):
 
     def parse(self, parser):
         lineno = next(parser.stream).lineno
-        token = parser.stream.expect(lexer.TOKEN_STRING)
-        filename = nodes.Const(token.value)
-        call = self.call_method('_get_url', [filename], lineno=lineno)
-
-        return nodes.Output([call], lineno=lineno)
+        args = [parser.parse_expression()]
+        return nodes.Output([
+            nodes.MarkSafeIfAutoescape(self.call_method('_get_url', args))
+        ]).set_lineno(lineno)
 
     def _get_url(self, filename):
         the_page = None

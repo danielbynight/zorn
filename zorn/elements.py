@@ -3,9 +3,8 @@ import os
 
 import jinja2
 
-from zorn import errors, markdown
-
-from .filters import relative_path
+from zorn import errors
+import markdown
 from .jinja_extensions import Url
 
 
@@ -38,17 +37,16 @@ class Page:
         return self.title
 
     def set_content_from_md(self, settings):
-        parser = markdown.MarkdownParser(self, settings.pages, settings.url_style, settings.debug)
         if os.path.isfile(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))):
             with open(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
-                body_content = parser.convert_to_html(
+                body_content = markdown.markdown(
                     body_content,
                     extensions=settings.markdown_extensions
                 )
         elif type(self) is Page and self.sub_pages != []:
             # Create menu-page in case no content was set for this page
-            body_content = parser.convert_to_html(
+            body_content = markdown.markdown(
                 self.generate_content_menu(settings.url_style),
                 extensions=settings.markdown_extensions
             )
@@ -67,7 +65,6 @@ class Page:
 
         env = jinja2.Environment(extensions=[Url])
         env.zorn_settings = settings
-        env.filters['relativepath'] = relative_path
         env.loader = jinja2.FileSystemLoader(settings.templates_dir)
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
