@@ -5,7 +5,7 @@ import pytest
 
 from zorn.elements import Page, ZornSettings
 from zorn.errors import PageNotFound
-from zorn.jinja_extensions import Url, Static
+from zorn.jinja_extensions import Static, Url
 
 
 def test_url():
