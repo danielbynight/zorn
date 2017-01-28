@@ -10,7 +10,22 @@ from .jinja_extensions import Url
 
 
 class Page:
-    def __init__(self, title, file_name, sub_pages=None):
+    def __init__(self, title: str, file_name: str, sub_pages: list(SubPage) = None):
+        """Represents a page of the website
+
+        A page object should have a title - the verbose name which is going to be printed to the html - and a filename
+        - a name which uniquely identifies a page and which corresponds to the name of the markdown file containing the
+        content of the page (if it exists). The file_name is algo going to be the name of the html file of the page
+        when generated. Extensions should not be used in file_name.
+
+        :Example:
+
+            a_page = Page('This Is A Page', 'test_page', [SubPage('A Sub Page', 'test_sub_page')])
+
+        :param title: the title of the page
+        :param file_name: a unique identifier of the page
+        :param sub_pages: a list with the subpage objects nested under this page
+        """
         self.title = title
         self.file_name = file_name
         if sub_pages is None:
@@ -25,7 +40,16 @@ class Page:
         self.css_path = None
         self.html = None
 
-    def generate_content_menu(self, url_style):
+    def __str__(self) -> str:
+        return self.title
+
+    def generate_content_menu(self, url_style: str) -> str:
+        """Generates a markdown menu for its sub pages
+
+        :param url_style: the website's url style ("nested" or "flat")
+        :returns: string with the menu for the nested sub pages
+        :rtype: str
+        """
         content = '#' + self.title + '\n'
         for sub_page in self.sub_pages:
             url = './{0}/{1}.html'.format(self.file_name, sub_page.file_name) \
@@ -34,10 +58,16 @@ class Page:
             content += '- [{0}]({1})\n'.format(sub_page.title, url)
         return content
 
-    def __str__(self):
-        return self.title
+    def set_content_from_md(self, settings: ZornSettings) -> None:
+        """Sets the page content from its Markdown file
 
-    def set_content_from_md(self, settings):
+        Looks for a .md file with the filename `self.file_name` and extension `.md` and sets the body_content of the
+        page to the content of that file. If such file doesn't exist, the body content will be set to an empty string,
+        unless the page object has nested subpages - in that case the body content will be set to the page's menu by
+        calling :func:`generate_content_menu`.
+
+        :param settings: the website settings
+        """
         if os.path.isfile(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))):
             with open(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
@@ -61,7 +91,12 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    def render_html(self, context, settings):
+    def render_html(self, context: dict, settings: ZornSettings) -> None:
+        """Generate the html for the page and save it to `self.html`
+
+        :param context: the context dictionary to be passed to the templates
+        :param settings: the website's settings
+        """
         self.set_css_path(settings.debug, settings.url_style)
 
         env = jinja2.Environment(extensions=[Url])
@@ -71,18 +106,40 @@ class Page:
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
 
-    def save_html(self, site_dir, url_style='flat'):
+    def save_html(self, site_dir: str, url_style: str = 'flat') -> None:
+        """Save the html of the page in its html file
+
+        :param site_dir: root directory of the project
+        :param url_style: the website's url style
+        """
         page_path = os.path.join(site_dir, '{0}.html'.format(self.file_name))
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
-    def get_path_to_root(self, url_style='flat', debug=False):
+    def get_path_to_root(self, url_style: str = 'flat', debug: bool = False) -> str:
+        """Return the path to the root of the website from the page
+
+        The path to the root is a file system path in case of debug being on.
+
+        :param url_style: the website's url style
+        :param debug: the website's debug setting
+        :return:
+        """
         if debug is True:
             return './'
         else:
             return '/'
 
-    def get_relative_path(self, from_page, url_style='flat', debug=False):
+    def get_relative_path(self, from_page: Page, url_style: str = 'flat', debug: bool = False) -> str:
+        """Return its path relative from another page
+
+        The path to the root is a file system path in case of debug being on.
+
+        :param from_page: the page to which the path should be relative
+        :param url_style: the website's url style
+        :param debug: the website's debug setting
+        :return:
+        """
         if debug is False:
             if self.file_name == 'index':
                 return '/'
@@ -135,7 +192,7 @@ class SubPage(Page):
             if url_style == 'flat':
                 return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
             else:
-                return from_page.get_path_to_root(url_style, debug) + self.parent_page + '/' +\
+                return from_page.get_path_to_root(url_style, debug) + self.parent_page + '/' + \
                        self.file_name + '.html'
 
 
