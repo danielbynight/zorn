@@ -24,7 +24,7 @@ class ZornReplacementTag(ZornJinjaExtension):
         ]).set_lineno(lineno)
 
     def _get_replacement(self, args):
-        pass
+        return args
 
 
 class Url(ZornReplacementTag):

@@ -5,7 +5,17 @@ import pytest
 
 from zorn.elements import Page, ZornSettings
 from zorn.errors import PageNotFound
-from zorn.jinja_extensions import Static, Url
+from zorn.jinja_extensions import Static, Url, ZornReplacementTag
+
+
+def test_tag():
+    env = jinja2.Environment(extensions=[ZornReplacementTag])
+    env.loader = jinja2.FileSystemLoader(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures')
+    )
+    template = env.get_template('tag.html')
+    html = template.render()
+    assert html == 'This is a tag: test'
 
 
 def test_url():
