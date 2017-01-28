@@ -297,3 +297,14 @@ def test_relative_path_from_unlinked_page_to_subpage_with_flat_url_style_and_deb
     from_page = elements.UnlinkedPage('test 2', 'test2', ['path', 'to', 'the', 'page'])
     relative_path = to_page.get_relative_path(from_page, 'flat', True)
     assert relative_path == '../../../../test2.html'
+
+
+def test_get_path_to_root_with_debug_off():
+    page = elements.Page('test', 'test')
+    assert page.get_path_to_root(debug=False) == '/'
+
+    sub_page = elements.SubPage('test', 'test')
+    assert sub_page.get_path_to_root(debug=False) == '/'
+
+    unlinked_page = elements.UnlinkedPage('test', 'test')
+    assert unlinked_page.get_path_to_root(debug=False) == '/'
