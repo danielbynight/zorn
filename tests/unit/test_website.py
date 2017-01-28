@@ -12,23 +12,23 @@ def test_website_with_only_defaults():
         'project_name': 'test_project_name',
     })
     # Test non-optional settings
-    assert website.root_dir == 'test_root_dir'
-    assert website.project_name == 'test_project_name'
+    assert website.settings.root_dir == 'test_root_dir'
+    assert website.settings.project_name == 'test_project_name'
 
     # Test optional settings
-    assert website.debug is False
-    assert website.url_style == 'flat'
-    assert website.templates_dir == os.path.join(os.path.dirname(os.path.abspath(elements.__file__)), 'templates')
-    assert website.markdown_dir == os.path.join(website.root_dir, 'md')
-    assert website.markdown_extensions == []
-    assert website.site_dir == 'test_root_dir'
-    assert website.title == 'test_project_name'
-    assert website.subtitle == ''
-    assert website.description == ''
-    assert website.author == ''
-    assert website.keywords == ''
-    assert website.keywords == ''
-    assert website.pages == []
+    assert website.settings.debug is False
+    assert website.settings.url_style == 'flat'
+    assert website.settings.templates_dir == os.path.join(os.path.dirname(os.path.abspath(elements.__file__)),
+                                                          'templates')
+    assert website.settings.markdown_dir == os.path.join(website.settings.root_dir, 'md')
+    assert website.settings.markdown_extensions == []
+    assert website.settings.title == 'test_project_name'
+    assert website.settings.subtitle == ''
+    assert website.settings.description == ''
+    assert website.settings.author == ''
+    assert website.settings.keywords == ''
+    assert website.settings.keywords == ''
+    assert website.settings.pages == []
 
 
 def test_website_with_no_defaults():
@@ -41,7 +41,6 @@ def test_website_with_no_defaults():
         'templates_dir': 'test_templates_dir',
         'markdown_dir': 'test_markdown_dir',
         'markdown_extensions': ['test_markdown_extension'],
-        'site_dir': 'test_site_dir',
         'site_title': 'test_site_title',
         'site_subtitle': 'test_site_subtitle',
         'description': 'test description',
@@ -50,22 +49,21 @@ def test_website_with_no_defaults():
         'pages': pages
     })
     # Test non-optional settings
-    assert website.root_dir == 'test_root_dir'
-    assert website.project_name == 'test_project_name'
+    assert website.settings.root_dir == 'test_root_dir'
+    assert website.settings.project_name == 'test_project_name'
 
     # Test optional settings
-    assert website.debug is True
-    assert website.url_style == 'nested'
-    assert website.templates_dir == 'test_templates_dir'
-    assert website.markdown_dir == 'test_markdown_dir'
-    assert website.markdown_extensions == ['test_markdown_extension']
-    assert website.site_dir == 'test_site_dir'
-    assert website.title == 'test_site_title'
-    assert website.subtitle == 'test_site_subtitle'
-    assert website.description == 'test description'
-    assert website.author == 'Test Author'
-    assert website.keywords == 'test keyword'
-    assert website.pages == pages
+    assert website.settings.debug is True
+    assert website.settings.url_style == 'nested'
+    assert website.settings.templates_dir == 'test_templates_dir'
+    assert website.settings.markdown_dir == 'test_markdown_dir'
+    assert website.settings.markdown_extensions == ['test_markdown_extension']
+    assert website.settings.title == 'test_site_title'
+    assert website.settings.subtitle == 'test_site_subtitle'
+    assert website.settings.description == 'test description'
+    assert website.settings.author == 'Test Author'
+    assert website.settings.keywords == 'test keyword'
+    assert website.settings.pages == pages
 
 
 def test_website_error_with_no_root_dir():
@@ -193,10 +191,10 @@ def test_website_set_parent_pages():
         'project_name': 'test_project_name',
         'pages': pages
     })
-    sub_pages = [page for page in website.pages if type(pages) is elements.SubPage]
+    sub_pages = [page for page in website.settings.pages if type(pages) is elements.SubPage]
     for sub_page in sub_pages:
         assert sub_page.parent_page is None
     website.set_parent_pages()
-    sub_pages = [page for page in website.pages if type(pages) is elements.SubPage]
+    sub_pages = [page for page in website.settings.pages if type(pages) is elements.SubPage]
     for sub_page in sub_pages:
         assert sub_page.parent_page in ['test1', 'test2']

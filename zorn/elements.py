@@ -2,8 +2,11 @@ import datetime
 import os
 
 import jinja2
+import markdown
 
-from zorn import errors, markdown
+from zorn import errors
+
+from .jinja_extensions import Url
 
 
 class Page:
@@ -34,21 +37,19 @@ class Page:
     def __str__(self):
         return self.title
 
-    def set_content_from_md(self, all_pages, markdown_dir, markdown_extensions=None, url_style='flat', debug=False):
-        markdown_extensions = [] if markdown_extensions is None else markdown_extensions
-        parser = markdown.MarkdownParser(self, all_pages, url_style, debug)
-        if os.path.isfile(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))):
-            with open(os.path.join(markdown_dir, '{0}.md'.format(self.file_name))) as f:
+    def set_content_from_md(self, settings):
+        if os.path.isfile(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))):
+            with open(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))) as f:
                 body_content = f.read()
-                body_content = parser.convert_to_html(
+                body_content = markdown.markdown(
                     body_content,
-                    extensions=markdown_extensions
+                    extensions=settings.markdown_extensions
                 )
         elif type(self) is Page and self.sub_pages != []:
             # Create menu-page in case no content was set for this page
-            body_content = parser.convert_to_html(
-                self.generate_content_menu(url_style),
-                extensions=markdown_extensions
+            body_content = markdown.markdown(
+                self.generate_content_menu(settings.url_style),
+                extensions=settings.markdown_extensions
             )
         else:
             body_content = ''
@@ -60,15 +61,13 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    def render_html(self, context, templates_dir, url_style='flat', debug=True):
-        self.set_css_path(debug, url_style)
+    def render_html(self, context, settings):
+        self.set_css_path(settings.debug, settings.url_style)
 
-        def relative_path(to_page, from_page, url_style='flat', debug=False):
-            return to_page.get_relative_path(from_page, url_style, debug)
-
-        env = jinja2.Environment()
-        env.filters['relativepath'] = relative_path
-        env.loader = jinja2.FileSystemLoader(templates_dir)
+        env = jinja2.Environment(extensions=[Url])
+        env.zorn_settings = settings
+        env.zorn_page = self
+        env.loader = jinja2.FileSystemLoader(settings.templates_dir)
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
 
@@ -77,6 +76,12 @@ class Page:
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
+    def get_path_to_root(self, url_style='flat', debug=False):
+        if debug is True:
+            return './'
+        else:
+            return '/'
+
     def get_relative_path(self, from_page, url_style='flat', debug=False):
         if debug is False:
             if self.file_name == 'index':
@@ -84,20 +89,10 @@ class Page:
             else:
                 return '/' + self.file_name
         else:
-            if type(from_page) is Page:
-                return './' + self.file_name + '.html'
-            elif type(from_page) is SubPage:
-                if url_style == 'nested':
-                    return '../' + self.file_name + '.html'
-                else:
-                    return './' + self.file_name + '.html'
-            elif type(from_page) is UnlinkedPage:
-                return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
+            return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
 
 
 class SubPage(Page):
-    """A helper class to avoid attempts of creation of sub-sub pages"""
-
     def __init__(self, title, file_name):
         super().__init__(title, file_name, [])
         self.parent_page = None
@@ -124,6 +119,12 @@ class SubPage(Page):
             with open(page_path, 'w+') as f:
                 f.write(self.html)
 
+    def get_path_to_root(self, url_style='flat', debug=False):
+        if debug is False:
+            return '/'
+        else:
+            return './' if url_style == 'flat' else '../'
+
     def get_relative_path(self, from_page, url_style='flat', debug=False):
         if debug is False:
             if url_style == 'flat':
@@ -131,22 +132,11 @@ class SubPage(Page):
             else:
                 return '/' + self.parent_page + '/' + self.file_name
         else:
-            if type(from_page) is Page:
-                if url_style == 'flat':
-                    return './' + self.file_name + '.html'
-                else:
-                    return './' + self.parent_page + '/' + self.file_name + '.html'
-            elif type(from_page) is SubPage:
-                if url_style == 'flat':
-                    return './' + self.file_name + '.html'
-                else:
-                    return '../' + self.parent_page + '/' + self.file_name + '.html'
-            elif type(from_page) is UnlinkedPage:
-                if url_style == 'flat':
-                    return ''.join(['../' for _ in range(len(from_page.path))]) + self.file_name + '.html'
-                else:
-                    return ''.join(['../' for _ in range(len(from_page.path))]) + \
-                           self.parent_page + '/' + self.file_name + '.html'
+            if url_style == 'flat':
+                return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
+            else:
+                return from_page.get_path_to_root(url_style, debug) + self.parent_page + '/' +\
+                       self.file_name + '.html'
 
 
 class UnlinkedPage(Page):
@@ -174,24 +164,20 @@ class UnlinkedPage(Page):
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
+    def get_path_to_root(self, url_style='flat', debug=False):
+        if debug is False:
+            return '/'
+        else:
+            return ''.join(['../' for _ in range(len(self.path))])
+
     def get_relative_path(self, from_page, url_style='flat', debug=False):
         if debug is False:
             return '/' + '/'.join(self.path) + '/' + self.file_name
         else:
-            relative_path = '/'.join(self.path) + '/' + self.file_name + '.html'
-            if type(from_page) is Page:
-                relative_path = './' + relative_path
-            elif type(from_page) is SubPage:
-                if url_style == 'flat':
-                    relative_path = './' + relative_path
-                else:
-                    relative_path = '../' + relative_path
-            elif type(from_page) is UnlinkedPage:
-                relative_path = ''.join(['../' for _ in range(len(from_page.path))]) + relative_path
-            return relative_path
+            return from_page.get_path_to_root(url_style, debug) + '/'.join(self.path) + '/' + self.file_name + '.html'
 
 
-class Website:
+class ZornSettings:
     def __init__(self, settings):
 
         settings_keys = settings.keys()
@@ -213,14 +199,14 @@ class Website:
         self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
+        self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
+            else os.path.join(self.root_dir, 'static')
+
         self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
             else os.path.join(self.root_dir, 'md')
 
         self.markdown_extensions = settings['markdown_extensions'] if 'markdown_extensions' in settings_keys \
             else []
-
-        self.site_dir = settings['site_dir'] if 'site_dir' in settings \
-            else self.root_dir
 
         self.title = settings['site_title'] if 'site_title' in settings_keys \
             else self.project_name
@@ -245,18 +231,22 @@ class Website:
                     all_pages.extend(page.sub_pages)
         self.pages = all_pages
 
+
+class Website:
+    def __init__(self, settings):
+        self.settings = ZornSettings(settings)
+
     def set_parent_pages(self):
-        for main_page in self.pages:
+        for main_page in self.settings.pages:
             if type(main_page) is Page:
                 for sub_page in main_page.sub_pages:
                     sub_page.parent_page = main_page.file_name
 
     def generate_pages(self):
         self.set_parent_pages()
-        for page in self.pages:
+        for page in self.settings.pages:
 
-            page.set_content_from_md(self.pages, self.markdown_dir, self.markdown_extensions, self.url_style,
-                                     self.debug)
+            page.set_content_from_md(self.settings)
 
             # list of links which should have class "active" in nav bar
             active_nav_links = [page.file_name]
@@ -265,25 +255,27 @@ class Website:
                 active_nav_links.append(page.parent_page)
 
             # generate css path
-            page.set_css_path(self.debug, self.url_style)
+            page.set_css_path(self.settings.debug, self.settings.url_style)
 
-            page.render_html({
-                'debug': self.debug,
-                'site_description': self.description,
-                'site_author': self.author,
-                'site_keywords': self.keywords,
-                'site_title': self.title,
-                'site_subtitle': self.subtitle.replace(' ', '&nbsp;'),
+            context = {
+                'debug': self.settings.debug,
+                'site_description': self.settings.description,
+                'site_author': self.settings.author,
+                'site_keywords': self.settings.keywords,
+                'site_title': self.settings.title,
+                'site_subtitle': self.settings.subtitle.replace(' ', '&nbsp;'),
                 'page_title': page.title,
                 'back_path': ''.join(['../' for _ in range(len(page.path))]) if type(page) is UnlinkedPage else '../',
                 'page_type': type(page).__name__,
                 'body_content': page.body_content,
                 'current_year': datetime.datetime.now().year,
                 'current_page': page,
-                'pages': [page for page in self.pages if type(page) is Page],
+                'pages': [page for page in self.settings.pages if type(page) is Page],
                 'active_nav_links': active_nav_links,
-                'url_style': self.url_style,
+                'url_style': self.settings.url_style,
                 'css_path': page.css_path,
-            }, self.templates_dir, self.url_style, self.debug)
+            }
 
-            page.save_html(self.site_dir, url_style=self.url_style)
+            page.render_html(context, self.settings)
+
+            page.save_html(self.settings.root_dir, url_style=self.settings.url_style)
