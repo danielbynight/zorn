@@ -123,7 +123,7 @@ class Page:
 
         :param url_style: the website's url style
         :param debug: the website's debug setting
-        :return:
+        :returns: path to root from page
         """
         if debug is True:
             return './'
@@ -138,7 +138,7 @@ class Page:
         :param from_page: the page to which the path should be relative
         :param url_style: the website's url style
         :param debug: the website's debug setting
-        :return:
+        :returns: relative path to page from `from_page`
         """
         if debug is False:
             if self.file_name == 'index':
