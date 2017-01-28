@@ -6,7 +6,7 @@ import markdown
 
 from zorn import errors
 
-from .jinja_extensions import Url
+from .jinja_extensions import Static, Url
 
 URL_STYLE_FLAT = 'flat'
 URL_STYLE_NESTED = 'nested'
@@ -88,21 +88,14 @@ class Page:
             body_content = ''
         self.body_content = body_content
 
-    def set_css_path(self, debug=False, url_style=URL_STYLE_FLAT):
-        if debug is False:
-            self.css_path = '/main.min.css'
-        else:
-            self.css_path = './main.css'
-
     def render_html(self, context: dict, settings: 'ZornSettings') -> None:
         """Generate the html for the page and save it to `self.html`
 
         :param context: the context dictionary to be passed to the templates
         :param settings: the website's settings
         """
-        self.set_css_path(settings.debug, settings.url_style)
 
-        env = jinja2.Environment(extensions=[Url])
+        env = jinja2.Environment(extensions=[Url, Static])
         env.zorn_settings = settings
         env.zorn_page = self
         env.loader = jinja2.FileSystemLoader(settings.templates_dir)
@@ -157,15 +150,6 @@ class SubPage(Page):
         super().__init__(title, file_name, [])
         self.parent_page = None
 
-    def set_css_path(self, debug=False, url_style=URL_STYLE_FLAT):
-        if debug is False:
-            self.css_path = '/main.min.css'
-        else:
-            if url_style == URL_STYLE_NESTED:
-                self.css_path = '../main.css'
-            else:
-                self.css_path = './main.css'
-
     def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
         if url_style == URL_STYLE_FLAT:
             page_path = os.path.join(site_dir, '{0}.html'.format(self.file_name))
@@ -207,12 +191,6 @@ class UnlinkedPage(Page):
         elif type(path) == str:
             path = path.split('/')
         self.path = path
-
-    def set_css_path(self, debug=False, url_style=URL_STYLE_FLAT):
-        if debug is False:
-            self.css_path = '/main.min.css'
-        else:
-            self.css_path = ''.join(['../' for _ in range(len(self.path))]) + 'main.css'
 
     def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
         final_dir = site_dir
@@ -314,9 +292,6 @@ class Website:
                 # if the page in question is a subpage then activate parent too
                 active_nav_links.append(page.parent_page)
 
-            # generate css path
-            page.set_css_path(self.settings.debug, self.settings.url_style)
-
             context = {
                 'debug': self.settings.debug,
                 'site_description': self.settings.description,
@@ -333,7 +308,6 @@ class Website:
                 'pages': [page for page in self.settings.pages if type(page) is Page],
                 'active_nav_links': active_nav_links,
                 'url_style': self.settings.url_style,
-                'css_path': page.css_path,
             }
 
             page.render_html(context, self.settings)
