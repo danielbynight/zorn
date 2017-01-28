@@ -58,7 +58,7 @@ class Page:
             content += '- [{0}]({1})\n'.format(sub_page.title, url)
         return content
 
-    def set_content_from_md(self, settings: ZornSettings) -> None:
+    def set_content_from_md(self, settings: 'ZornSettings') -> None:
         """Sets the page content from its Markdown file
 
         Looks for a .md file with the filename `self.file_name` and extension `.md` and sets the body_content of the
@@ -91,7 +91,7 @@ class Page:
         else:
             self.css_path = './main.css'
 
-    def render_html(self, context: dict, settings: ZornSettings) -> None:
+    def render_html(self, context: dict, settings: 'ZornSettings') -> None:
         """Generate the html for the page and save it to `self.html`
 
         :param context: the context dictionary to be passed to the templates
@@ -130,7 +130,7 @@ class Page:
         else:
             return '/'
 
-    def get_relative_path(self, from_page: Page, url_style: str = 'flat', debug: bool = False) -> str:
+    def get_relative_path(self, from_page: 'Page', url_style: str = 'flat', debug: bool = False) -> str:
         """Return its path relative from another page
 
         The path to the root is a file system path in case of debug being on.
