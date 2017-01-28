@@ -10,7 +10,7 @@ from .jinja_extensions import Url
 
 
 class Page:
-    def __init__(self, title: str, file_name: str, sub_pages: list(SubPage) = None):
+    def __init__(self, title: str, file_name: str, sub_pages: list('SubPage') = None):
         """Represents a page of the website
 
         A page object should have a title - the verbose name which is going to be printed to the html - and a filename
