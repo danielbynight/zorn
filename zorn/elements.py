@@ -8,6 +8,9 @@ from zorn import errors
 
 from .jinja_extensions import Url
 
+URL_STYLE_FLAT = 'flat'
+URL_STYLE_NESTED = 'nested'
+
 
 class Page:
     def __init__(self, title: str, file_name: str, sub_pages: list('SubPage') = None):
@@ -53,7 +56,7 @@ class Page:
         content = '#' + self.title + '\n'
         for sub_page in self.sub_pages:
             url = './{0}/{1}.html'.format(self.file_name, sub_page.file_name) \
-                if url_style == 'nested' \
+                if url_style == URL_STYLE_NESTED \
                 else './{0}.html'.format(sub_page.file_name)
             content += '- [{0}]({1})\n'.format(sub_page.title, url)
         return content
@@ -85,7 +88,7 @@ class Page:
             body_content = ''
         self.body_content = body_content
 
-    def set_css_path(self, debug=False, url_style='flat'):
+    def set_css_path(self, debug=False, url_style=URL_STYLE_FLAT):
         if debug is False:
             self.css_path = '/main.min.css'
         else:
@@ -106,7 +109,7 @@ class Page:
         template = env.get_template(os.path.join('structure.html'))
         self.html = template.render(context)
 
-    def save_html(self, site_dir: str, url_style: str = 'flat') -> None:
+    def save_html(self, site_dir: str, url_style: str = URL_STYLE_FLAT) -> None:
         """Save the html of the page in its html file
 
         :param site_dir: root directory of the project
@@ -116,7 +119,7 @@ class Page:
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
-    def get_path_to_root(self, url_style: str = 'flat', debug: bool = False) -> str:
+    def get_path_to_root(self, url_style: str = URL_STYLE_FLAT, debug: bool = False) -> str:
         """Return the path to the root of the website from the page
 
         The path to the root is a file system path in case of debug being on.
@@ -130,7 +133,7 @@ class Page:
         else:
             return '/'
 
-    def get_relative_path(self, from_page: 'Page', url_style: str = 'flat', debug: bool = False) -> str:
+    def get_relative_path(self, from_page: 'Page', url_style: str = URL_STYLE_FLAT, debug: bool = False) -> str:
         """Return its path relative from another page
 
         The path to the root is a file system path in case of debug being on.
@@ -154,17 +157,17 @@ class SubPage(Page):
         super().__init__(title, file_name, [])
         self.parent_page = None
 
-    def set_css_path(self, debug=False, url_style='flat'):
+    def set_css_path(self, debug=False, url_style=URL_STYLE_FLAT):
         if debug is False:
             self.css_path = '/main.min.css'
         else:
-            if url_style == 'nested':
+            if url_style == URL_STYLE_NESTED:
                 self.css_path = '../main.css'
             else:
                 self.css_path = './main.css'
 
-    def save_html(self, site_dir, url_style='flat'):
-        if url_style == 'flat':
+    def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
+        if url_style == URL_STYLE_FLAT:
             page_path = os.path.join(site_dir, '{0}.html'.format(self.file_name))
             with open(page_path, 'w+') as f:
                 f.write(self.html)
@@ -176,20 +179,20 @@ class SubPage(Page):
             with open(page_path, 'w+') as f:
                 f.write(self.html)
 
-    def get_path_to_root(self, url_style='flat', debug=False):
+    def get_path_to_root(self, url_style=URL_STYLE_FLAT, debug=False):
         if debug is False:
             return '/'
         else:
-            return './' if url_style == 'flat' else '../'
+            return './' if url_style == URL_STYLE_FLAT else '../'
 
-    def get_relative_path(self, from_page, url_style='flat', debug=False):
+    def get_relative_path(self, from_page, url_style=URL_STYLE_FLAT, debug=False):
         if debug is False:
-            if url_style == 'flat':
+            if url_style == URL_STYLE_FLAT:
                 return '/' + self.file_name
             else:
                 return '/' + self.parent_page + '/' + self.file_name
         else:
-            if url_style == 'flat':
+            if url_style == URL_STYLE_FLAT:
                 return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
             else:
                 return from_page.get_path_to_root(url_style, debug) + self.parent_page + '/' + \
@@ -205,13 +208,13 @@ class UnlinkedPage(Page):
             path = path.split('/')
         self.path = path
 
-    def set_css_path(self, debug=False, url_style='flat'):
+    def set_css_path(self, debug=False, url_style=URL_STYLE_FLAT):
         if debug is False:
             self.css_path = '/main.min.css'
         else:
             self.css_path = ''.join(['../' for _ in range(len(self.path))]) + 'main.css'
 
-    def save_html(self, site_dir, url_style='flat'):
+    def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
         final_dir = site_dir
         for partial in self.path:
             if not os.path.exists(os.path.join(final_dir, partial)):
@@ -221,13 +224,13 @@ class UnlinkedPage(Page):
         with open(page_path, 'w+') as f:
             f.write(self.html)
 
-    def get_path_to_root(self, url_style='flat', debug=False):
+    def get_path_to_root(self, url_style=URL_STYLE_FLAT, debug=False):
         if debug is False:
             return '/'
         else:
             return ''.join(['../' for _ in range(len(self.path))])
 
-    def get_relative_path(self, from_page, url_style='flat', debug=False):
+    def get_relative_path(self, from_page, url_style=URL_STYLE_FLAT, debug=False):
         if debug is False:
             return '/' + '/'.join(self.path) + '/' + self.file_name
         else:
@@ -251,7 +254,7 @@ class ZornSettings:
         # Optional settings
         self.debug = settings['debug'] if 'debug' in settings_keys else False
 
-        self.url_style = settings['url_style'] if 'url_style' in settings_keys else 'flat'
+        self.url_style = settings['url_style'] if 'url_style' in settings_keys else URL_STYLE_FLAT
 
         self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
             else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
