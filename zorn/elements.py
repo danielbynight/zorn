@@ -12,6 +12,61 @@ URL_STYLE_FLAT = 'flat'
 URL_STYLE_NESTED = 'nested'
 
 
+class ZornSettings:
+    def __init__(self, settings):
+
+        settings_keys = settings.keys()
+
+        # Non-optional settings
+        if 'root_dir' not in settings_keys:
+            raise errors.SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
+        self.root_dir = settings['root_dir']
+
+        if 'project_name' not in settings_keys:
+            raise errors.SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
+        self.project_name = settings['project_name']
+
+        # Optional settings
+        self.debug = settings['debug'] if 'debug' in settings_keys else False
+
+        self.url_style = settings['url_style'] if 'url_style' in settings_keys else URL_STYLE_FLAT
+
+        self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
+            else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+
+        self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
+            else os.path.join(self.root_dir, 'static')
+
+        self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
+            else os.path.join(self.root_dir, 'md')
+
+        self.markdown_extensions = settings['markdown_extensions'] if 'markdown_extensions' in settings_keys \
+            else []
+
+        self.title = settings['site_title'] if 'site_title' in settings_keys \
+            else self.project_name
+
+        self.subtitle = settings['site_subtitle'] if 'site_subtitle' in settings_keys \
+            else ''
+
+        self.description = settings['description'] if 'description' in settings_keys \
+            else ''
+
+        self.author = settings['author'] if 'author' in settings_keys \
+            else ''
+
+        self.keywords = settings['keywords'] if 'keywords' in settings_keys \
+            else ''
+
+        all_pages = []
+        if 'pages' in settings_keys:
+            for page in settings['pages']:
+                all_pages.append(page)
+                if len(page.sub_pages) > 0:
+                    all_pages.extend(page.sub_pages)
+        self.pages = all_pages
+
+
 class Page:
     def __init__(self, title: str, file_name: str, sub_pages: list('SubPage') = None):
         """Represents a page of the website
@@ -213,61 +268,6 @@ class UnlinkedPage(Page):
             return '/' + '/'.join(self.path) + '/' + self.file_name
         else:
             return from_page.get_path_to_root(url_style, debug) + '/'.join(self.path) + '/' + self.file_name + '.html'
-
-
-class ZornSettings:
-    def __init__(self, settings):
-
-        settings_keys = settings.keys()
-
-        # Non-optional settings
-        if 'root_dir' not in settings_keys:
-            raise errors.SettingNotFoundError('ROOT_DIR has to be set in the settings module.')
-        self.root_dir = settings['root_dir']
-
-        if 'project_name' not in settings_keys:
-            raise errors.SettingNotFoundError('PROJECT_NAME has to be set in the settings module.')
-        self.project_name = settings['project_name']
-
-        # Optional settings
-        self.debug = settings['debug'] if 'debug' in settings_keys else False
-
-        self.url_style = settings['url_style'] if 'url_style' in settings_keys else URL_STYLE_FLAT
-
-        self.templates_dir = settings['templates_dir'] if 'templates_dir' in settings_keys \
-            else os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-
-        self.static_dir = settings['static_dir'] if 'static_dir' in settings_keys \
-            else os.path.join(self.root_dir, 'static')
-
-        self.markdown_dir = settings['markdown_dir'] if 'markdown_dir' in settings_keys \
-            else os.path.join(self.root_dir, 'md')
-
-        self.markdown_extensions = settings['markdown_extensions'] if 'markdown_extensions' in settings_keys \
-            else []
-
-        self.title = settings['site_title'] if 'site_title' in settings_keys \
-            else self.project_name
-
-        self.subtitle = settings['site_subtitle'] if 'site_subtitle' in settings_keys \
-            else ''
-
-        self.description = settings['description'] if 'description' in settings_keys \
-            else ''
-
-        self.author = settings['author'] if 'author' in settings_keys \
-            else ''
-
-        self.keywords = settings['keywords'] if 'keywords' in settings_keys \
-            else ''
-
-        all_pages = []
-        if 'pages' in settings_keys:
-            for page in settings['pages']:
-                all_pages.append(page)
-                if len(page.sub_pages) > 0:
-                    all_pages.extend(page.sub_pages)
-        self.pages = all_pages
 
 
 class Website:
