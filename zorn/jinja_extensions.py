@@ -1,7 +1,7 @@
 from jinja2 import nodes
 from jinja2.ext import Extension
 
-from zorn.errors import PageNotFound
+from zorn.errors import PathNotFound
 
 
 class ZornJinjaExtension(Extension):
@@ -36,7 +36,7 @@ class Url(ZornReplacementTag):
             if page.file_name == filename:
                 the_page = page
         if the_page is None:
-            raise PageNotFound('The page with file name "{0}" was not found for this website.'.format(filename))
+            raise PathNotFound('The page with file name "{0}" was not found for this website.'.format(filename))
         return the_page.get_relative_path(
             self.environment.zorn_page,
             self.environment.zorn_settings.url_style,
