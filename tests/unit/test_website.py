@@ -194,7 +194,7 @@ def test_website_set_parent_pages():
     sub_pages = [page for page in website.settings.pages if type(pages) is elements.SubPage]
     for sub_page in sub_pages:
         assert sub_page.parent_page is None
-    website.set_parent_pages()
+    website._set_parent_pages()
     sub_pages = [page for page in website.settings.pages if type(pages) is elements.SubPage]
     for sub_page in sub_pages:
         assert sub_page.parent_page in ['test1', 'test2']

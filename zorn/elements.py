@@ -101,12 +101,88 @@ class ZornSettings:
         if 'pages' in settings_keys:
             for page in settings['pages']:
                 all_pages.append(page)
-                if len(page.sub_pages) > 0:
+                if type(page) is Page and len(page.sub_pages) > 0:
                     all_pages.extend(page.sub_pages)
         self.pages = all_pages
 
 
-class Page:
+class PageAbstraction:
+    def __init__(self, title, file_name):
+        self.title = title
+        self.file_name = file_name
+
+        self.body_content = ''
+        self.css_path = None
+        self.html = None
+
+    def __str__(self):
+        return self.title
+
+    def set_content_from_md(self, settings):
+        """Sets the page content from its Markdown file
+
+        Looks for a .md file with the filename `self.file_name` and extension `.md` and sets the body_content of the
+        page to the content of that file. If such file doesn't exist, the body content will be set to an empty string,
+        unless the page object has nested subpages - in that case the body content will be set to the page's menu by
+        calling :func:`generate_content_menu`.
+
+        :param settings: the website settings
+        """
+        if os.path.isfile(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))):
+            with open(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))) as f:
+                body_content = f.read()
+                self.body_content = markdown.markdown(
+                    body_content,
+                    extensions=settings.markdown_extensions
+                )
+
+    def render_html(self, context, settings):
+        """Generate the html for the page and save it to `self.html`
+
+        :param context: the context dictionary to be passed to the templates
+        :param settings: the website's settings
+        """
+
+        env = jinja2.Environment(extensions=[Url, Static])
+        env.zorn_settings = settings
+        env.zorn_page = self
+        env.loader = jinja2.FileSystemLoader(settings.templates_dir)
+        template = env.get_template(os.path.join('structure.html'))
+        self.html = template.render(context)
+
+    def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
+        """Save the html of the page in its html file
+
+        :param site_dir: root directory of the project
+        :param url_style: the website's url style
+        """
+        pass
+
+    def get_path_to_root(self, url_style=URL_STYLE_FLAT, debug=False):
+        """Return the path to the root of the website from the page
+
+        The path to the root is a file system path in case of debug being on.
+
+        :param url_style: the website's url style
+        :param debug: the website's debug setting
+        :returns: path to root from page
+        """
+        pass
+
+    def get_relative_path(self, from_page, url_style=URL_STYLE_FLAT, debug=False):
+        """Return its path relative from another page
+
+        The path to the root is a file system path in case of debug being on.
+
+        :param from_page: the page to which the path should be relative
+        :param url_style: the website's url style
+        :param debug: the website's debug setting
+        :returns: relative path to page from `from_page`
+        """
+        pass
+
+
+class Page(PageAbstraction):
     def __init__(self, title, file_name, sub_pages=None):
         """Represents a page of the website
 
@@ -123,8 +199,8 @@ class Page:
         :param file_name: a unique identifier of the page
         :param sub_pages: a list with the subpage objects nested under this page
         """
-        self.title = title
-        self.file_name = file_name
+        super().__init__(title, file_name)
+
         if sub_pages is None:
             sub_pages = []
 
@@ -133,9 +209,6 @@ class Page:
                 raise errors.PageError('All elements of submenu have to be of type zorn.Elements.SubPage')
 
         self.sub_pages = sub_pages
-        self.body_content = None
-        self.css_path = None
-        self.html = None
 
     def __str__(self):
         return self.title
@@ -165,36 +238,13 @@ class Page:
 
         :param settings: the website settings
         """
-        if os.path.isfile(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))):
-            with open(os.path.join(settings.markdown_dir, '{0}.md'.format(self.file_name))) as f:
-                body_content = f.read()
-                body_content = markdown.markdown(
-                    body_content,
-                    extensions=settings.markdown_extensions
-                )
-        elif type(self) is Page and self.sub_pages != []:
+        super().set_content_from_md(settings)
+        if self.body_content != '' and self.sub_pages != []:
             # Create menu-page in case no content was set for this page
-            body_content = markdown.markdown(
+            self.body_content = markdown.markdown(
                 self.generate_content_menu(settings.url_style),
                 extensions=settings.markdown_extensions
             )
-        else:
-            body_content = ''
-        self.body_content = body_content
-
-    def render_html(self, context, settings):
-        """Generate the html for the page and save it to `self.html`
-
-        :param context: the context dictionary to be passed to the templates
-        :param settings: the website's settings
-        """
-
-        env = jinja2.Environment(extensions=[Url, Static])
-        env.zorn_settings = settings
-        env.zorn_page = self
-        env.loader = jinja2.FileSystemLoader(settings.templates_dir)
-        template = env.get_template(os.path.join('structure.html'))
-        self.html = template.render(context)
 
     def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
         """Save the html of the page in its html file
@@ -239,7 +289,7 @@ class Page:
             return from_page.get_path_to_root(url_style, debug) + self.file_name + '.html'
 
 
-class SubPage(Page):
+class SubPage(PageAbstraction):
     def __init__(self, title, file_name):
         """Represents a page of the website which is nested under a main page (represented by a Page object)
 
@@ -249,7 +299,7 @@ class SubPage(Page):
         :param file_name: a unique identifier of the page
         :param sub_pages: a list with the subpage objects nested under this page
         """
-        super().__init__(title, file_name, [])
+        super().__init__(title, file_name)
         self.parent_page = None
 
     def save_html(self, site_dir, url_style=URL_STYLE_FLAT):
@@ -285,7 +335,7 @@ class SubPage(Page):
                        self.file_name + '.html'
 
 
-class UnlinkedPage(Page):
+class UnlinkedPage(PageAbstraction):
     def __init__(self, title, file_name, path=None):
         """Represents a page of the website which is not featured in the generated navigation
 
@@ -295,7 +345,7 @@ class UnlinkedPage(Page):
         :param file_name: a unique identifier of the page
         :param sub_pages: a list with the subpage objects nested under this page
         """
-        super().__init__(title, file_name, [])
+        super().__init__(title, file_name)
         if path is None:
             path = []
         elif type(path) == str:
