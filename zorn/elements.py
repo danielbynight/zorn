@@ -122,9 +122,7 @@ class PageAbstraction:
         """Sets the page content from its Markdown file
 
         Looks for a .md file with the filename `self.file_name` and extension `.md` and sets the body_content of the
-        page to the content of that file. If such file doesn't exist, the body content will be set to an empty string,
-        unless the page object has nested subpages - in that case the body content will be set to the page's menu by
-        calling :func:`generate_content_menu`.
+        page to the content of that file. If such file doesn't exist, the body content remain an empty string.
 
         :param settings: the website settings
         """
@@ -231,15 +229,13 @@ class Page(PageAbstraction):
     def set_content_from_md(self, settings):
         """Sets the page content from its Markdown file
 
-        Looks for a .md file with the filename `self.file_name` and extension `.md` and sets the body_content of the
-        page to the content of that file. If such file doesn't exist, the body content will be set to an empty string,
-        unless the page object has nested subpages - in that case the body content will be set to the page's menu by
-        calling :func:`generate_content_menu`.
+        Extend the method from `PageAbstraction` with an extra step of generating a menu for its subpages if no content
+        was found in the markdown files.
 
         :param settings: the website settings
         """
         super().set_content_from_md(settings)
-        if self.body_content != '' and self.sub_pages != []:
+        if self.body_content == '' and self.sub_pages != []:
             # Create menu-page in case no content was set for this page
             self.body_content = markdown.markdown(
                 self.generate_content_menu(settings.url_style),
