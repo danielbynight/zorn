@@ -68,4 +68,4 @@ def test_static():
     )
     template = env.get_template('static.html')
     html = template.render()
-    assert html == 'This is a static file: /something.html'
+    assert html == 'This is a static file: /static/something.html'
