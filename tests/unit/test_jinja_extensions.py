@@ -4,7 +4,7 @@ import jinja2
 import pytest
 
 from zorn.elements import Page, ZornSettings
-from zorn.errors import PageNotFound
+from zorn.errors import PathNotFound
 from zorn.jinja_extensions import Static, Url, ZornReplacementTag
 
 
@@ -37,7 +37,7 @@ def test_url():
 
 
 def test_page_not_found_with_unexistent_filename():
-    with pytest.raises(PageNotFound):
+    with pytest.raises(PathNotFound):
         env = jinja2.Environment(extensions=[Url])
         test_page_from = Page('test_page1', 'test_page1')
         test_page_to = Page('test_page3', 'test_page3')
@@ -68,4 +68,4 @@ def test_static():
     )
     template = env.get_template('static.html')
     html = template.render()
-    assert html == 'This is a static file: /something.html'
+    assert html == 'This is a static file: /static/something.html'

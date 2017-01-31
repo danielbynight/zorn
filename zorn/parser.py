@@ -5,15 +5,27 @@ from zorn import tasks
 
 
 def process_creation_request(args=None):
+    """Simple helper to deal with the project creation command
+
+    :param args: command line arguments
+    """
     CreationParser(args).run()
 
 
 def process_admin_request(args=None):
+    """Simple helper to deal with project administration commands
+
+    :param args: command line arguments
+    """
     AdminParser(args).run()
 
 
 class Parser:
     def __init__(self, args=None):
+        """Wraps the argparse ArgumentParser with some helpful methods
+
+        :param args: arguments from the command line
+        """
         self._parser = argparse.ArgumentParser()
         self.task = None
         self.args = args
@@ -21,6 +33,7 @@ class Parser:
         self._parsed_args = None
 
     def add_arguments(self):
+        """Register arguments to the parser"""
         self._parser.add_argument(
             '-v', '--verbose', action='store_true', help='make zorn talk more to you'
         )
@@ -29,6 +42,7 @@ class Parser:
         )
 
     def parse_arguments(self):
+        """Parse the arguments from the argument parser and set them as task arguments"""
         self._parsed_args = self._parser.parse_args(self.args)
         if self._parsed_args.silent is True:
             self.set_task_argument('verbosity', 0)
@@ -38,13 +52,16 @@ class Parser:
             self.set_task_argument('verbosity', 1)
 
     def run_task(self):
+        """Instantiate the task and runs it"""
         task = self.task(**self.task_arguments)
         task.run()
 
     def set_task_argument(self, arg, value):
+        """Set arguments in the dictionary to be passed to the task object"""
         self.task_arguments[arg] = value
 
     def run(self):
+        """Run all the necessary method to instanciate and configure the task and runs the task"""
         self.add_arguments()
         self.parse_arguments()
         self.run_task()
@@ -52,6 +69,12 @@ class Parser:
 
 class CreationParser(Parser):
     def __init__(self, args=None):
+        """Extend Parser
+
+        The CreationParser can only trigger the `Create` task.
+
+        :param args: arguments from the command line
+        """
         super().__init__(args)
         self._parser.description = 'A tool for creation of zorn projects.'
         tasks_module = sys.modules['zorn.tasks']
@@ -93,6 +116,12 @@ class AdminParser(Parser):
     }
 
     def __init__(self, args=None):
+        """Extend Parser
+
+        AdminParser only runs tasks which concern an already created Zorn project.
+
+        :param args:
+        """
         super().__init__(args)
         self._parser.description = 'A tool for management of zorn projects.'
         self.update = False

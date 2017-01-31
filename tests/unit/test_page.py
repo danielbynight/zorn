@@ -5,6 +5,14 @@ import pytest
 from zorn import elements, errors
 
 
+def test_page_abstraction():
+    page = elements.PageAbstraction('Test', 'test')
+    assert str(page) == 'Test'
+    assert page.save_html('test_dir') is None
+    assert page.get_path_to_root() is None
+    assert page.get_relative_path(elements.PageAbstraction('Test2', 'test2')) is None
+
+
 def test_page():
     page = elements.Page('Test', 'test')
     assert page.title == 'Test'
@@ -109,39 +117,6 @@ def test_unlinkedpage_without_path():
     assert unlinked_page.title == 'Test'
     assert unlinked_page.file_name == 'test'
     assert unlinked_page.path == []
-
-
-def test_set_css_path_of_page():
-    page = elements.Page('test', 'Test')
-    page.set_css_path(True)
-    assert page.css_path == './main.css'
-
-
-def test_set_css_path_of_subpage():
-    page = elements.SubPage('test', 'Test')
-    page.set_css_path(True, 'flat')
-    assert page.css_path == './main.css'
-    other_page = elements.SubPage('test', 'Test')
-    other_page.set_css_path(True, 'nested')
-    assert other_page.css_path == '../main.css'
-
-
-def test_set_css_path_of_unlinked_page():
-    page = elements.UnlinkedPage('test', 'Test', ['path', 'to', 'page'])
-    page.set_css_path(True)
-    assert page.css_path == '../../../main.css'
-
-
-def test_set_css_path_with_no_debug():
-    page = elements.Page('test', 'Test')
-    page.set_css_path()
-    assert page.css_path == '/main.min.css'
-    sub_page = elements.SubPage('test', 'Test')
-    sub_page.set_css_path()
-    assert sub_page.css_path == '/main.min.css'
-    unlinked_page = elements.UnlinkedPage('test', 'Test', ['path', 'to', 'page'])
-    unlinked_page.set_css_path()
-    assert unlinked_page.css_path == '/main.min.css'
 
 
 def test_relative_path_from_page_to_page_with_debug_off():

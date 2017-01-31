@@ -2,6 +2,7 @@ import getpass
 import importlib.util
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -11,6 +12,7 @@ from zorn import elements, errors
 
 
 class CliColors:
+    """Helper which holds the colors to color the output to the command line"""
     HEADER = '\033[32m'
     ERROR = '\033[1;31m'
     SUCESS = '\033[1;32m'
@@ -19,19 +21,82 @@ class CliColors:
 
 class Task:
     def __init__(self, **kwargs):
+        """Base zorn task with mixins for comunication and running the task
+
+        By default the only accepted argument is `verbosity`, which sets the verbosity level for the task (0, 1 or 2
+        from less to more verbose)
+
+        :param kwargs: arguments for the specific task
+        """
         self.verbosity = kwargs['verbosity'] if 'verbosity' in kwargs.keys() else 1
 
     def communicate(self, message, standard_verbosity=True):
+        """Communicates message to the user or not, depending on verbosity level
+
+        :param message: message to communicate
+        :param standard_verbosity: If `False`, then message is always communicated, else the message is communicated
+        only if standard verbosity is set (`verbosity = 1`)
+        """
         if self.verbosity == 2 or (self.verbosity == 1 and standard_verbosity is True):
             print(message)
 
     def run(self):
+        """Run the task
+
+        By default it only greets the user. Has to be extended.
+        """
         self.communicate('\n' + CliColors.HEADER + 'Welcome to zorn!' + CliColors.RESET)
 
 
 class AdminTask(Task):
+    def __init__(self, **kwargs):
+        """A task to alter an already created Zorn project
+
+        Extend Task.
+
+        :param verbosity: the verbosity level
+        :param update: if `True` the settings will be auto-updated
+        :param task_args: the arguments for the specific task
+        """
+        super().__init__(**kwargs)
+        self.update = kwargs['update'] if 'update' in kwargs.keys() else False
+        self.settings = AdminTask.process_settings()
+        self.task_args = kwargs['task_args'] if 'task_args' in kwargs.keys() else None
+
+    def update_settings(self, setting, value):
+        """Update the project's setting in case this was requested
+
+        It can only update a one-line setting. That is sufficient for the kind of tasks we have
+
+        :param setting: the setting to be updated
+        :param value: the value for that setting
+        """
+        if self.update is True:
+            setting_name = setting.upper()
+            new_setting = '{0} = {1}\n'.format(setting_name, value)
+            with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'r') as f:
+                current_settings = f.read()
+
+            if setting_name in current_settings:
+                new_settings = ''
+                for line in current_settings.splitlines(True):
+                    if re.match('^' + setting_name + ' = ', line) is not None:
+                        new_settings += new_setting
+                    else:
+                        new_settings += line
+                with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'w') as f:
+                    f.write(new_settings)
+            else:
+                with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
+                    f.write('\n' + new_setting)
+
     @staticmethod
     def process_settings():
+        """Read project settings and return them neatly in a dictionary
+
+        :returns: settings dictionary
+        :rtype: dict
+        """
         if 'ZORN_SETTINGS_PATH' not in os.environ.keys() or os.environ['ZORN_SETTINGS_PATH'] is None:
             raise errors.NotAZornProjectError('You are not inside a zorn project!')
         spec = importlib.util.spec_from_file_location(
@@ -49,22 +114,22 @@ class AdminTask(Task):
 
         return settings
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.update = kwargs['update'] if 'update' in kwargs.keys() else False
-        self.settings = AdminTask.process_settings()
-        self.task_args = kwargs['task_args'] if 'task_args' in kwargs.keys() else None
-
-    def update_settings(self, setting, value):
-        if self.update is True:
-            with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
-                f.write('\n\n# updated setting:\n{0} = {1}\n'.format(setting.upper(), value))
-
 
 class Create(Task):
     STYLES = ['basic', 'soprano']
 
     def __init__(self, **kwargs):
+        """Create a new zorn project
+
+        Extend Task.
+
+        :param verbosity: the verbosity level
+        :param project_name: the project name
+        :param site_title: the title of the site
+        :param author: the author of the site
+        :param style: the style (bundle of `scss` files) for the site
+        :param generate: if `True`, generate the website after having created it
+        """
         super().__init__(**kwargs)
 
         # Settings
@@ -192,12 +257,20 @@ class Create(Task):
             self.communicate('Now you can run "npm install" to generate the website!\n')
         self.communicate(CliColors.SUCESS + 'Good luck!' + CliColors.RESET + '\n')
 
-    # Create tasks
+    # "Create" sub-tasks
 
     def create_dir(self, dir_name):
+        """Helper to create a directory under the project root
+
+        :param dir_name: the name of the directory to be created
+        """
         os.mkdir(os.path.join(self.root_dir, dir_name))
 
     def add_file_from_template(self, file_name):
+        """Adds a file to the root directory generated from a template file
+
+        :param file_name: the name of the template file
+        """
         with open(os.path.join(self.script_dir, 'defaults', file_name)) as f:
             raw_settings_content = f.read()
         template = jinja2.Template(raw_settings_content)
@@ -211,16 +284,31 @@ class Create(Task):
             f.write(file_content)
 
     def add_file_with_content(self, path_to, content):
+        """Writes content to a new file in the project
+
+        :param path_to: path to the file relative to the project's root directory
+        :param content: content to be written in the file
+        """
         with open(os.path.join(self.root_dir, path_to), 'w') as f:
             f.write(content)
 
     def copy_file(self, path_from, path_to):
+        """Copy a file from one location in the zorn package to a location in the project
+
+        :param path_from: path of the original file, relative to the Zorn package (including file name)
+        :param path_to: path of the final file, relative to the project's root directory (including file name)
+        """
         shutil.copy(
             os.path.join(self.script_dir, path_from),
             os.path.join(self.root_dir, path_to)
         )
 
     def copy_dir(self, path_from, path_to):
+        """Copy a directory and everything inside it from a location in the Zorn package to the project
+
+        :param path_from: path of the directory, relative to the Zorn package
+        :param path_to: final path, relative to the project's root directory
+        """
         shutil.copytree(
             os.path.join(self.script_dir, path_from),
             os.path.join(self.root_dir, path_to)
@@ -229,6 +317,7 @@ class Create(Task):
 
 class Generate(AdminTask):
     def run(self):
+        """Generate the html of the site"""
         super().run()
         self.communicate(CliColors.RESET + 'Generating... \n')
         website = elements.Website(self.settings)
@@ -238,6 +327,7 @@ class Generate(AdminTask):
 
 class ImportTemplates(AdminTask):
     def run(self):
+        """Import the templates directory and everything inside it from the Zorn package to the project"""
         super().run()
         self.communicate(CliColors.RESET + 'Importing templates...\n')
         shutil.copytree(
@@ -250,6 +340,12 @@ class ImportTemplates(AdminTask):
 
 class ImportStyle(AdminTask):
     def __init__(self, **kwargs):
+        """Extend Admin task
+
+        This task takes one parsed argument - the style to be imported.
+
+        :param kwargs:
+        """
         super().__init__(**kwargs)
         input_style = self.task_args[0]
         if input_style not in Create.STYLES:
@@ -259,6 +355,7 @@ class ImportStyle(AdminTask):
         self.style = input_style
 
     def run(self):
+        """Import a the requested style from the Zorn package to the projects"""
         super().run()
         self.communicate(CliColors.RESET + 'Importing style "{0}"...\n'.format(self.style))
         shutil.copytree(
