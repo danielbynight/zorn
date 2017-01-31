@@ -4,7 +4,7 @@ import json
 import os
 import shutil
 import sys
-
+import re
 import jinja2
 
 from zorn import elements, errors
@@ -65,13 +65,29 @@ class AdminTask(Task):
     def update_settings(self, setting, value):
         """Update the project's setting in case this was requested
 
+        It can only update a one-line setting. That is sufficient for the kind of tasks we have
+
         :param setting: the setting to be updated
         :param value: the value for that setting
         """
         if self.update is True:
-            with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
-                # @todo: just correct the setting if it is already mentioned in the file
-                f.write('\n\n# updated setting:\n{0} = {1}\n'.format(setting.upper(), value))
+            setting_name = setting.upper()
+            new_setting = '{0} = {1}\n'.format(setting_name, value)
+            with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'r') as f:
+                current_settings = f.read()
+
+            if setting_name in current_settings:
+                new_settings = ''
+                for line in current_settings.splitlines(True):
+                    if re.match('^' + setting_name + ' = ', line) is not None:
+                        new_settings += new_setting
+                    else:
+                        new_settings += line
+                with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'w') as f:
+                    f.write(new_settings)
+            else:
+                with open(os.path.join(self.settings['root_dir'], 'settings.py'), 'a') as f:
+                    f.write('\n' + new_setting)
 
     @staticmethod
     def process_settings():
