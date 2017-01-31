@@ -4,6 +4,12 @@ import pytest
 
 from zorn import elements, errors
 
+def test_page_abstraction():
+    page = elements.PageAbstraction('Test', 'test')
+    assert str(page) == 'Test'
+    assert page.save_html('test_dir') == None
+    assert page.get_path_to_root() == None
+    assert page.get_relative_path(elements.PageAbstraction('Test2', 'test2')) == None
 
 def test_page():
     page = elements.Page('Test', 'test')
