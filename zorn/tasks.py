@@ -2,9 +2,10 @@ import getpass
 import importlib.util
 import json
 import os
+import re
 import shutil
 import sys
-import re
+
 import jinja2
 
 from zorn import elements, errors
