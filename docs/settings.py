@@ -7,8 +7,8 @@ DEBUG = True
 # General
 
 PROJECT_NAME = 'docs'
-SITE_TITLE = 'Zorn'
-AUTHOR = 'Daniel Matias Ferrer'
+SITE_TITLE = 'Zorn Package Documentation'
+AUTHOR = 'danielmatiasferrer'
 
 # Directories
 
