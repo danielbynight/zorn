@@ -9,7 +9,7 @@
             <ul class="submenu">
                 {% for sub_page in page.sub_pages %}
                 <li>
-                    <a href="{% url page.file_name %}"
+                    <a href="{% url sub_page.file_name %}"
                        {% if sub_page.title in active_nav_links %}class="active"{% endif %}>{{ sub_page.title }}</a>
                 </li>
                 {% endfor %}
