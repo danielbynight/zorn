@@ -27,7 +27,7 @@ At the end of the script simply instantiate a `zorn.Project` and call its `gener
 
 ```python
 if __name__ == '__main__':
-    project = Project(Settings)
+    project = zorn.Project(Settings)
     project.generate()
 ```
 
