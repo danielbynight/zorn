@@ -1,5 +1,10 @@
 # Zorn - a static website generator
 
+Install this version by running
+```bash
+pip install git+https://github.com/xassbit/zorn.git@zorn1
+```
+
 ## Quick Start
 
 Zorn is a simple website generator. To generate a site simply drop a Python script in your project root which imports `zorn` and start writing configuration. It should look something like this:
