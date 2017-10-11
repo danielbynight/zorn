@@ -19,7 +19,6 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    scripts=['zorn/bin/zorn'],
     install_requires=[
         'markdown',
         'Jinja2'
