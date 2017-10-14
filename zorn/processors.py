@@ -15,7 +15,7 @@ class JinjaProcessor(Processor):
         env.page = page
         template = env.get_template(page.template_name)
         page.context.update(development=self.settings.DEVELOPMENT)
-        page.content = template.render(page.context)
+        page.content = template.render(page.context).encode('utf-8')
 
 
 class FileSystemProcessor(Processor):
@@ -25,7 +25,7 @@ class FileSystemProcessor(Processor):
             # create sub directories if they don't exist
             os.makedirs(output_dir)
 
-        with open(os.path.join(output_dir, page.file_name), 'w') as file:
+        with open(os.path.join(output_dir, page.file_name), 'wb') as file:
             file.write(page.content)
 
 
