@@ -43,7 +43,7 @@ class SettingsMixin:
         try:
             return getattr(self.settings, setting)
         except AttributeError:
-            return SettingNotFound(
+            raise SettingNotFound(
                 '{setting} has to be be defined in the project settings in order to use {class_name}'
                     .format(setting=setting, class_name=self.__class__.__name__)
             )
