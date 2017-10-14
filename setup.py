@@ -9,7 +9,7 @@ def read(fname):
 
 setup(
     name='zorn',
-    version='1.0.1',
+    version='1.0.2',
     author='Daniel Matias Ferrer',
     author_email='controlledflame@gmail.com',
     description='A light static website generator.',
