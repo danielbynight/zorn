@@ -14,7 +14,7 @@ class JinjaProcessor(Processor):
         env.settings = self.settings
         env.page = page
         template = env.get_template(page.template_name)
-        page.context.update(development=self.settings.DEVELOPMENT)
+        page.context.update({'development': self.settings.DEVELOPMENT})
         page.content = template.render(page.context).encode('utf-8')
 
 
