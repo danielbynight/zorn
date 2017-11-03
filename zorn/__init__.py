@@ -1,3 +1,10 @@
+"""
+Zorn main module
+
+This module contains the class definitions which constitute the core of Zorn.
+Most of this classes are abstract: they are meant to be extended with the settings
+for the Zorn project.
+"""
 from abc import ABCMeta, abstractmethod
 
 
@@ -7,6 +14,7 @@ class SettingNotFound(AttributeError):
 
 
 class Page:
+    """Represents a Page in a Zorn project"""
     def __init__(self, template_name, file_name=None, context=None, route='', name=None):
         self.template_name = template_name
         self.file_name = file_name if file_name is not None else template_name.split('/')[-1]
@@ -16,26 +24,26 @@ class Page:
         self.name = name
 
 
-class Settings:
-    __metaclass__ = ABCMeta
+class Settings(metaclass=ABCMeta):
+    """Holds the basic settings for a Zorn project"""
     PAGES = ()
     PROCESSORS = ()
     PLUGINS = ()
 
     @property
     @abstractmethod
+    # pylint: disable=invalid-name
     def ROOT_DIR(self):
         pass
 
     @property
     @abstractmethod
+    # pylint: disable=invalid-name
     def TEMPLATES_DIR(self):
         pass
 
 
-class SettingsMixin:
-    __metaclass__ = ABCMeta
-
+class SettingsMixin(metaclass=ABCMeta):
     def __init__(self, settings):
         self.settings = settings
 
@@ -45,7 +53,7 @@ class SettingsMixin:
         except AttributeError:
             raise SettingNotFound(
                 '{setting} has to be be defined in the project settings in order to use {class_name}'
-                    .format(setting=setting, class_name=self.__class__.__name__)
+                .format(setting=setting, class_name=self.__class__.__name__)
             )
 
 
@@ -61,17 +69,13 @@ class Project(SettingsMixin):
                 processor.render(page)
 
 
-class Processor(SettingsMixin):
-    __metaclass__ = ABCMeta
-
+class Processor(SettingsMixin, metaclass=ABCMeta):
     @abstractmethod
     def render(self, page):
         pass
 
 
-class Plugin(SettingsMixin):
-    __metaclass__ = ABCMeta
-
+class Plugin(SettingsMixin, metaclass=ABCMeta):
     @abstractmethod
     def run(self, *args, **kwargs):
         pass

@@ -1,16 +1,22 @@
 import os
+from abc import ABCMeta, abstractmethod
+
 from jinja2 import nodes
 from jinja2.ext import Extension
 from markdown import markdown
 
 
-class JinjaExtension(Extension):
+class JinjaExtension(Extension, metaclass=ABCMeta):
     def __init__(self, environment):
         super().__init__(environment)
         environment.extend(settings=None, page=None)
 
+    @abstractmethod
+    def parse(self, parser):
+        pass
 
-class ReplacementTag(JinjaExtension):
+
+class ReplacementTag(JinjaExtension, metaclass=ABCMeta):
     tags = {'tag'}
 
     def parse(self, parser):
@@ -20,29 +26,30 @@ class ReplacementTag(JinjaExtension):
             nodes.MarkSafeIfAutoescape(self.call_method('_get_replacement', args))
         ]).set_lineno(lineno)
 
-    def _get_replacement(self, index):
-        return index
+    @abstractmethod
+    def _get_replacement(self, text_input):
+        return text_input
 
 
 class Static(ReplacementTag):
     tags = {'static'}
 
-    def _get_replacement(self, filename):
-        return './' + filename if self.environment.settings.DEVELOPMENT is True else '/' + filename
+    def _get_replacement(self, text_input):
+        return './' + text_input if self.environment.settings.DEVELOPMENT is True else '/' + text_input
 
 
 class Url(ReplacementTag):
     tags = {'url'}
 
-    def _get_replacement(self, page_name):
+    def _get_replacement(self, text_input):
         the_page = None
         for page in self.environment.settings.PAGES:
-            if page.name == page_name:
+            if page.name == text_input:
                 the_page = page
                 break
 
         if the_page is None:
-            return page_name
+            return text_input
 
         if self.environment.settings.DEVELOPMENT is True:
             route_to_root = ''
@@ -71,7 +78,7 @@ class Url(ReplacementTag):
 class Markdown(ReplacementTag):
     tags = {'markdown'}
 
-    def _get_replacement(self, filename):
-        with open(os.path.join(self.environment.settings.TEMPLATES_DIR, filename)) as f:
-            content = f.read()
+    def _get_replacement(self, text_input):
+        with open(os.path.join(self.environment.settings.TEMPLATES_DIR, text_input)) as file:
+            content = file.read()
         return markdown(content)
